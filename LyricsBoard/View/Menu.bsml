@@ -1,0 +1,23 @@
+﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+	<settings-scroll-view child-control-width='true' child-control-height='true' child-expand-width='true' size-delta-y='0'>
+		<toggle-setting value='display-lyrics-board' text='Display lyrics board' apply-on-change='true' bind-value='true' />
+		<text text='---- BOARD APPEARANCE ----' bold='true' underlined='true' />
+		<slider-setting value='board-position-x' text='Left-Right' min='-10' max='10' increment='0.1' integer-only='false' show-buttons='true' apply-on-change='true' bind-value='true' />
+		<slider-setting value='board-position-y' text='Bottom-Top' min='-10' max='10' increment='0.1' integer-only='false' show-buttons='true' apply-on-change='true' bind-value='true' />
+		<slider-setting value='board-position-z' text='Near-Far'   min='1'   max='30' increment='0.1' integer-only='false' show-buttons='true' apply-on-change='true' bind-value='true' />
+		<slider-setting value='board-width'      text='Width'      min='1'   max='20' increment='0.1' integer-only='false' show-buttons='true' apply-on-change='true' bind-value='true' />
+		<slider-setting value='font-size'        text='Font size'  min='1'   max='10' increment='0.1' integer-only='false' show-buttons='true' apply-on-change='true' bind-value='true' />
+		<text text='---- SET ADDITIONAL OFFSET ----' bold='true' underlined='true' />
+		<toggle-setting value='additional-offset-enabled' text='Additional offset enabled' apply-on-change='true' bind-value='true' />
+		<slider-setting value='additional-offset-ms' text='Additional offset (ms)' min='-60000' max='60000' increment='100' integer-only='true' show-buttons='true' apply-on-change='true' bind-value='true' />
+		<text text='---- OVERWRITE ANIMATION SETTING ----' bold='true' underlined='true' />
+		<toggle-setting value='expiration-time-enabled' text='Expiration time overwrite' apply-on-change='true' bind-value='true' />
+		<slider-setting value='expiration-time-ms' text='Expiration time (ms)' min='100' max='60000' increment='100' integer-only='true' show-buttons='true' apply-on-change='true' bind-value='true' />
+		<toggle-setting value='animation-duration-enabled' text='Animation duration overwrite' apply-on-change='true' bind-value='true' />
+		<slider-setting value='animation-duration-ms' text='Animation duration (ms)' min='0' max='10000' increment='100' integer-only='true' show-buttons='true' apply-on-change='true' bind-value='true' />
+		<toggle-setting value='standby-duration-enabled' text='Standby duration overwrite' apply-on-change='true' bind-value='true' />
+		<slider-setting value='standby-duration-ms' text='Standby duration (ms)' min='0' max='10000' increment='100' integer-only='true' show-buttons='true' apply-on-change='true' bind-value='true' />
+		<text text='---- MISC ----' bold='true' underlined='true' />
+		<button text='[Not working] Clear cache' on-click='clear-cache'/>
+	</settings-scroll-view>
+</bg>

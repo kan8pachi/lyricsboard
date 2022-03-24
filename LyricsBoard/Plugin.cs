@@ -1,60 +1,35 @@
 ﻿using IPA;
 using IPA.Config;
 using IPA.Config.Stores;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using UnityEngine.SceneManagement;
+using LyricsBoard.Core.System;
+using SiraUtil.Zenject;
 using IPALogger = IPA.Logging.Logger;
 
 namespace LyricsBoard
 {
-    [Plugin(RuntimeOptions.SingleStartInit)]
+    [Plugin(RuntimeOptions.DynamicInit), NoEnableDisable]
     public class Plugin
     {
-        internal static Plugin Instance { get; private set; }
-        internal static IPALogger Log { get; private set; }
+        //public const string HarmonyId = "com.github.kan8pachi.LyricsBoard";
+        //internal static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(HarmonyId);
 
         [Init]
-        /// <summary>
-        /// Called when the plugin is first loaded by IPA (either when the game starts or when the plugin is enabled if it starts disabled).
-        /// [Init] methods that use a Constructor or called before regular methods like InitWithConfig.
-        /// Only use [Init] with one Constructor.
-        /// </summary>
-        public void Init(IPALogger logger)
+        public Plugin(IPALogger logger, Config conf, Zenjector zenjector)
         {
-            Instance = this;
-            Log = logger;
-            Log.Info("LyricsBoard initialized.");
-        }
-
-        #region BSIPA Config
-        //Uncomment to use BSIPA's config
-        /*
-        [Init]
-        public void InitWithConfig(Config conf)
-        {
-            Configuration.PluginConfig.Instance = conf.Generated<Configuration.PluginConfig>();
-            Log.Debug("Config loaded");
-        }
-        */
-        #endregion
-
-        [OnStart]
-        public void OnApplicationStart()
-        {
-            Log.Debug("OnApplicationStart");
-            new GameObject("LyricsBoardController").AddComponent<LyricsBoardController>();
-
-        }
-
-        [OnExit]
-        public void OnApplicationQuit()
-        {
-            Log.Debug("OnApplicationQuit");
-
+            var pluginConfig = conf.Generated<Configuration.PluginConfig>();
+            zenjector.UseLogger(logger);
+            zenjector.Install(Location.App, container => {
+                container.Bind<IFileSystem>().To<SilentFileSystem>().AsCached();
+                container.Bind<Core.LyricsBoardContext>().AsSingle().WithArguments(pluginConfig);
+            });
+            zenjector.Install(Location.Menu, container =>
+            {
+                container.BindInterfacesTo<View.MenuViewController>().AsSingle();
+            });
+            zenjector.Install(Location.Player, container =>
+            {
+                container.BindInterfacesTo<View.BoardBehaviour>().AsCached();
+            });
         }
     }
 }
