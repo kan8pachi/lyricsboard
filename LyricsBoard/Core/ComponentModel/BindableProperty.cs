@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LyricsBoard.Core.ComponentModel.Extension;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 

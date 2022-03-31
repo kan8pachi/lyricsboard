@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LyricsBoard.Core.ComponentModel
 {
@@ -13,7 +14,7 @@ namespace LyricsBoard.Core.ComponentModel
             if (!disposed)
             {
                 disposed = true;
-                foreach (var d in disposables)
+                foreach (var d in Enumerable.Reverse(disposables))
                 {
                     d?.Dispose();
                 }
