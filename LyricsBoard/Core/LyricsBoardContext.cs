@@ -109,7 +109,10 @@ namespace LyricsBoard.Core
         {
             if (!AssertIfWorking()) { return null; }
 
-            var sd = songManager.GetSongDefinition(songId);
+
+            var sd = Config.ShowDebugLyrics
+                ? testSong
+                : songManager.GetSongDefinition(songId);
             if (sd is null) { return null; }
 
             var adjustedLyrics = AdjustLyrics(sd);

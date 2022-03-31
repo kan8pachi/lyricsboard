@@ -6,7 +6,7 @@ namespace LyricsBoard.Core.ComponentModel
 {
     internal class SimpleDisposer : IDisposable
     {
-        private List<IDisposable> disposables = new List<IDisposable>();
+        private readonly List<IDisposable> disposables = new();
         private bool disposed = false;
 
         public void Dispose()
@@ -18,6 +18,7 @@ namespace LyricsBoard.Core.ComponentModel
                 {
                     d?.Dispose();
                 }
+                disposables.Clear();
             }
         }
 
@@ -26,6 +27,7 @@ namespace LyricsBoard.Core.ComponentModel
             if (disposed)
             {
                 item.Dispose();
+                return;
             }
             disposables.Add(item);
         }

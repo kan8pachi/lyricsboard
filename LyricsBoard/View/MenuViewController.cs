@@ -135,6 +135,14 @@ namespace LyricsBoard.View
                 context.ClearSongCache();
             }
 
+            private BindableProperty<bool> showDebugLyrics;
+            [UIValue("standby-duration-enabled")]
+            public bool ShowDebugLyrics
+            {
+                get { return showDebugLyrics.Value; }
+                set { showDebugLyrics.Value = value; }
+            }
+
             public MenuHost(SiraLog logger, LyricsBoardContext context)
             {
                 this.logger = logger;
@@ -218,6 +226,13 @@ namespace LyricsBoard.View
                     (c) => c.LyricsStandbyDurationMsValue,
                     (c, value) => c.LyricsStandbyDurationMsValue = value,
                     () => RaisePropertyChanged(nameof(StandbyDurationMs))
+                ).AddTo(disposer);
+
+                //---- misc setting ----//
+                showDebugLyrics = conf.ToBindableProperty(
+                    (c) => c.ShowDebugLyrics,
+                    (c, value) => c.ShowDebugLyrics = value,
+                    () => RaisePropertyChanged(nameof(ShowDebugLyrics))
                 ).AddTo(disposer);
             }
 

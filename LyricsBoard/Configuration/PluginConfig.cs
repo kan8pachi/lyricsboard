@@ -111,6 +111,7 @@ namespace LyricsBoard.Configuration
         public float FontSize { get; set; } = 3.0f;
         public bool DisplayLyricsBoard { get; set; } = true;
         public bool ShowBoardBackground { get; set; } = false;
+        public bool ShowDebugLyrics { get; set; } = false;
 
         /// <summary>
         /// This is called whenever BSIPA reads the config from disk (including when file changes are detected).
