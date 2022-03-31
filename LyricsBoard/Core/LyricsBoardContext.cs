@@ -125,5 +125,10 @@ namespace LyricsBoard.Core
             );
             return calculator;
         }
+
+        public void ClearSongCache()
+        {
+            songManager.ClearSongCache();
+        }
     }
 }

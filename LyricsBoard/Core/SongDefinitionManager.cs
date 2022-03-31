@@ -29,5 +29,10 @@ namespace LyricsBoard.Core
             );
             return sd;
         }
+
+        public void ClearSongCache()
+        {
+            songCache.Clear();
+        }
     }
 }

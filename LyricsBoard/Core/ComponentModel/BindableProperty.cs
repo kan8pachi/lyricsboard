@@ -1,16 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace LyricsBoard.Core.ComponentModel
 {
     internal class BindableProperty<TProperty> : IDisposable
     {
-        private SimpleDisposer disposer = new SimpleDisposer();
-        private Func<TProperty> sourceGetter;
-        private Action<TProperty> sourceSetter;
-        private Action notifier;
+        private readonly SimpleDisposer disposer = new SimpleDisposer();
+        private readonly Func<TProperty> sourceGetter;
+        private readonly Action<TProperty> sourceSetter;
+        private readonly Action notifier;
 
         public BindableProperty(
-            ISimpleObservable observable,
+            INotifyPropertyChanged subject,
             Func<TProperty> sourceGetter,
             Action<TProperty> sourceSetter,
             Action notifier,
@@ -22,7 +24,8 @@ namespace LyricsBoard.Core.ComponentModel
             this.notifier = notifier;
 
             _value = initialValue;
-            observable
+            subject
+                .PropertyChangedAsObservable()
                 .Subscribe(OnSourceChanged)
                 .AddTo(disposer);
         }
@@ -34,18 +37,18 @@ namespace LyricsBoard.Core.ComponentModel
         {
             get { return _value; }
             set {
-                if (!_value.Equals(value))
+                if (!EqualityComparer<TProperty>.Default.Equals(_value, value))
                 {
                     _value = value;
-                    sourceSetter?.Invoke(value);
+                    sourceSetter(value);
                 }
             }
         }
 
-        private void OnSourceChanged()
+        private void OnSourceChanged(PropertyChangedEventArgs _)
         {
             var newValue = sourceGetter.Invoke();
-            if (!newValue.Equals(Value))
+            if (!EqualityComparer<TProperty>.Default.Equals(_value, newValue))
             {
                 Value = newValue;
                 notifier?.Invoke();
@@ -56,19 +59,19 @@ namespace LyricsBoard.Core.ComponentModel
     internal static class StrongBindableExtensions
     {
         public static BindableProperty<TProperty> ToBindableProperty<TSubject, TProperty>(
-            this TSubject observable,
+            this TSubject bindTarget,
             Func<TSubject, TProperty> sourceGetter,
             Action<TSubject, TProperty> sourceSetter,
             Action notifier
         )
-            where TSubject : ISimpleObservable
+            where TSubject : INotifyPropertyChanged
         {
             return new BindableProperty<TProperty>(
-                observable,
-                () => sourceGetter.Invoke(observable),
-                (value) => sourceSetter?.Invoke(observable, value),
+                bindTarget,
+                () => sourceGetter.Invoke(bindTarget),
+                (value) => sourceSetter?.Invoke(bindTarget, value),
                 notifier,
-                sourceGetter.Invoke(observable)
+                sourceGetter.Invoke(bindTarget)
             );
         }
 

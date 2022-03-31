@@ -3,21 +3,23 @@ using System.Collections.Generic;
 
 namespace LyricsBoard.Core.ComponentModel
 {
-    public class SimpleDisposer : IDisposable
+    internal class SimpleDisposer : IDisposable
     {
         private List<IDisposable> disposables = new List<IDisposable>();
         private bool disposed = false;
+
         public void Dispose()
         {
             if (!disposed)
             {
                 disposed = true;
-                foreach (var disposable in disposables)
+                foreach (var d in disposables)
                 {
-                    disposable?.Dispose();
+                    d?.Dispose();
                 }
             }
         }
+
         public void Add(IDisposable item)
         {
             if (disposed)
@@ -28,7 +30,7 @@ namespace LyricsBoard.Core.ComponentModel
         }
     }
 
-    public static class SimpleDisposerExtensions
+    internal static class SimpleDisposerExtensions
     {
         public static T AddTo<T>(this T disposable, SimpleDisposer disposer) where T : IDisposable
         {

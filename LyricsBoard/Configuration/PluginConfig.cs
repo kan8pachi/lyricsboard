@@ -1,15 +1,15 @@
-﻿using LyricsBoard.Core.ComponentModel;
-using System.ComponentModel;
+﻿using LyricsBoard.ComponentModel;
+using LyricsBoard.Core.ComponentModel;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 #nullable enable
 
 namespace LyricsBoard.Configuration
 {
-    public class PluginConfig : SimpleObservableTrait//, INotifyPropertyChanged
+    public class PluginConfig : BindableBase
     {
-        //public event PropertyChangedEventHandler? PropertyChanged;
-
         //------ additional offset ms ------//
         private int _lrcAdditionalOffsetMsValue = 0;
 
@@ -115,11 +115,9 @@ namespace LyricsBoard.Configuration
         /// <summary>
         /// This is called whenever BSIPA reads the config from disk (including when file changes are detected).
         /// </summary>
-        public virtual void OnReload()
-        {
-            // Do stuff after config is read from disk.
-            InvokeOnNext();   // Is this really working?
-        }
+        //public virtual void OnReload()
+        //{
+        //}
     }
 
     public static class PluginConfigExtensions

@@ -19,7 +19,7 @@ namespace LyricsBoard.ComponentModel
     /// <summary>
     /// Implementation of <see cref="INotifyPropertyChanged"/> to simplify models.
     /// </summary>
-    internal abstract class BindableBase : INotifyPropertyChanged
+    public abstract class BindableBase : INotifyPropertyChanged
     {
         /// <summary>
         /// Occurs when a property value changes.
