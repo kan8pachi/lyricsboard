@@ -109,7 +109,6 @@ namespace LyricsBoard.Core
         {
             if (!AssertIfWorking()) { return null; }
 
-
             var sd = Config.ShowDebugLyrics
                 ? testSong
                 : songManager.GetSongDefinition(songId);

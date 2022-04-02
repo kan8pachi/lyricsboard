@@ -4,9 +4,24 @@ namespace LyricsBoard.Core.ComponentModel
 {
     internal class SimpleDisposable : IDisposable
     {
-        private readonly Action disposeAction;
-        public SimpleDisposable(Action disposeAction) => this.disposeAction = disposeAction;
-        public void Dispose() => disposeAction?.Invoke();
+        private volatile Action? disposeAction;
+
+        public SimpleDisposable(Action disposeAction)
+        {
+            this.disposeAction = disposeAction;
+        }
+
+        public bool IsDisposed
+        {
+            get { return disposeAction is null; }
+        }
+
+        public void Dispose()
+        {
+            if (disposeAction is null) { return; }
+            disposeAction.Invoke();
+            disposeAction = null;
+        }
     }
 
     internal class EmptyDisposable : IDisposable

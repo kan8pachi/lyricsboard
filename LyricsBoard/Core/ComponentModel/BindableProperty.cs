@@ -46,7 +46,7 @@ namespace LyricsBoard.Core.ComponentModel
             }
         }
 
-        private void OnSourceChanged(PropertyChangedEventArgs _)
+        private void OnSourceChanged(PropertyChangedEventArgs args)
         {
             var newValue = sourceGetter.Invoke();
             if (!EqualityComparer<TProperty>.Default.Equals(_value, newValue))
