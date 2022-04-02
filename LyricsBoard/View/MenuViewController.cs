@@ -136,7 +136,7 @@ namespace LyricsBoard.View
             }
 
             private BindableProperty<bool> showDebugLyrics;
-            [UIValue("standby-duration-enabled")]
+            [UIValue("show-debug-lyrics")]
             public bool ShowDebugLyrics
             {
                 get { return showDebugLyrics.Value; }

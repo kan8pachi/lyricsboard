@@ -105,9 +105,9 @@ namespace LyricsBoard.Configuration
         }
 
         public float BoardPositionX { get; set; } = 0f;
-        public float BoardPositionY { get; set; } = -0.2f;
-        public float BoardPositionZ { get; set; } = 9.0f;
-        public float BoardWidth { get; set; } = 4.0f;
+        public float BoardPositionY { get; set; } = 1.8f;
+        public float BoardPositionZ { get; set; } = 15.0f;
+        public float BoardWidth { get; set; } = 3.0f;
         public float FontSize { get; set; } = 3.0f;
         public bool DisplayLyricsBoard { get; set; } = true;
         public bool ShowBoardBackground { get; set; } = false;
