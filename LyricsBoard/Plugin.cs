@@ -20,6 +20,7 @@ namespace LyricsBoard
             zenjector.UseLogger(logger);
             zenjector.Install(Location.App, container => {
                 container.Bind<IFileSystem>().To<SilentFileSystem>().AsCached();
+                container.Bind<IJson>().To<SilentJson>().AsCached();
                 container.Bind<Core.LyricsBoardContext>().AsSingle().WithArguments(pluginConfig);
             });
             zenjector.Install(Location.Menu, container =>

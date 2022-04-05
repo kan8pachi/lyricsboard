@@ -15,11 +15,13 @@ namespace LyricsBoard.Core
     internal class SongDefinitionLoader : ISongDefinitionLoader
     {
         private readonly IFileSystem fs;
+        private readonly IJson json;
         private readonly string folder;
 
-        public SongDefinitionLoader(IFileSystem fs, string folder)
+        public SongDefinitionLoader(IFileSystem fs, IJson json, string folder)
         {
             this.fs = fs;
+            this.json = json;
             this.folder = folder;
         }
 
@@ -68,29 +70,21 @@ namespace LyricsBoard.Core
             }
 
             // Parse JSON text.
-            Dictionary<string, string?> dict;
-            try
-            {
-                dict = JsonConvert.DeserializeObject<Dictionary<string, string?>>(content);
-            }
-            catch (Exception ex) when (ex is JsonReaderException || ex is JsonSerializationException)
-            {
-                return new SongDefinition(songHash);
-            }
+            var deserialized = json.DeserializeObjectOrDefault<Dictionary<string, string?>>(content);
 
             // dict sometimes be null. maybe when content is empty string?
-            if (dict is null)
+            if (deserialized is null)
             {
                 return new SongDefinition(songHash);
             }
 
             return GenerateCustomDefinitionSafely(
                 songHash,
-                PrimitiveParser.ParseIntOrDefault(dict?.GetOrDefault("OffsetMs", null), null),
-                PrimitiveParser.ParseIntOrDefault(dict?.GetOrDefault("MaxExpirationMs", null), null),
-                PrimitiveParser.ParseIntOrDefault(dict?.GetOrDefault("AnimationDurationMs", null), null),
-                PrimitiveParser.ParseIntOrDefault(dict?.GetOrDefault("StandbyDurationMs", null), null),
-                dict?.GetOrDefault("CustomLrcFileName", null)
+                PrimitiveParser.ParseIntOrDefault(deserialized?.GetOrDefault("OffsetMs", null), null),
+                PrimitiveParser.ParseIntOrDefault(deserialized?.GetOrDefault("MaxExpirationMs", null), null),
+                PrimitiveParser.ParseIntOrDefault(deserialized?.GetOrDefault("AnimationDurationMs", null), null),
+                PrimitiveParser.ParseIntOrDefault(deserialized?.GetOrDefault("StandbyDurationMs", null), null),
+                deserialized?.GetOrDefault("CustomLrcFileName", null)
             );
         }
 
