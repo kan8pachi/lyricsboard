@@ -21,7 +21,8 @@ namespace LyricsBoard.Core
         public LyricsBoardContext(
             SiraLog? logger,
             PluginConfig? config,
-            IFileSystem? fs
+            IFileSystem? fs,
+            IJson? json
         )
         {
             this.logger = logger;
@@ -29,6 +30,7 @@ namespace LyricsBoard.Core
             // check if injected parameters are not null.
             if (config is null) { throw new ArgumentNullException(nameof(config)); }
             if (fs is null) { throw new ArgumentNullException(nameof(fs)); }
+            if (json is null) { throw new ArgumentNullException(nameof(json)); }
             Config = config;
             this.fs = fs;
 
@@ -37,7 +39,7 @@ namespace LyricsBoard.Core
             var dataFolder = Path.Combine(ourFolder, "lyrics");
 
             testSong = SongDefinitionDummyGenerator.GenerateDummySong();
-            var sdLoader = new SongDefinitionLoader(fs, dataFolder);
+            var sdLoader = new SongDefinitionLoader(fs, json, dataFolder);
             songManager = new SongDefinitionManager(sdLoader, Config.CacheSize);
 
             var result = PrepareDataFolder(rootFolder, dataFolder);
