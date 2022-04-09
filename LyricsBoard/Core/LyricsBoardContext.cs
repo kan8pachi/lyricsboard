@@ -104,18 +104,28 @@ namespace LyricsBoard.Core
 
         /// <summary>
         /// Get the lyrics animation calculator for the sond ID.
+        /// When songId is invalid or lyrics not found, null will be returned unless ShowDebugLyrics is enabled.
         /// </summary>
-        /// <param name="songId">song hash. Must not be null.</param>
+        /// <param name="songId">song hash</param>
         /// <returns>calculator. may be null.</returns>
-        public ProgressCalculator? GetLyricsProgressCalculator(string songId)
+        public ProgressCalculator? GetLyricsProgressCalculator(string? songId)
         {
             if (!AssertIfWorking()) { return null; }
 
-            var sd = Config.ShowDebugLyrics
-                ? testSong
+            var sd = songId is null
+                ? null
                 : songManager.GetSongDefinition(songId);
-            if (sd is null) { return null; }
 
+            if (Config.ShowDebugLyrics)
+            {
+                sd ??= testSong;
+            }
+
+            if (sd is null) { return null; }
+            return GetLyricsProgressCalculatorFromSongDefinition(sd);
+        }
+
+        private ProgressCalculator? GetLyricsProgressCalculatorFromSongDefinition(SongDefinition sd) {
             var adjustedLyrics = AdjustLyrics(sd);
             if (adjustedLyrics is null) { return null; }
 
