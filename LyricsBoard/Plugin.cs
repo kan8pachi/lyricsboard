@@ -29,7 +29,7 @@ namespace LyricsBoard
             });
             zenjector.Install(Location.Player, container =>
             {
-                container.BindInterfacesTo<View.BoardBehaviour>().AsCached();
+                container.BindInterfacesTo<View.BoardViewController>().AsCached();
             });
         }
     }
