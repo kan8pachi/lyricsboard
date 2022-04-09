@@ -138,7 +138,7 @@ namespace LyricsBoard.View
         }
     }
 
-    internal class BoardBehaviour : IInitializable, ITickable, IDisposable
+    internal class BoardViewController : IInitializable, ITickable, IDisposable
     {
         private SiraLog? logger;
         private LyricsBoardContext context;
@@ -148,11 +148,11 @@ namespace LyricsBoard.View
         private BoardCanvas? canvas;
         private ProgressCalculator? calculator;
 
-        public BoardBehaviour(
+        public BoardViewController(
             SiraLog? logger,
-            LyricsBoardContext context,
-            GameplayCoreSceneSetupData gameplayCoreSceneSetupData,
-            AudioTimeSyncController audioTimeSyncController
+            LyricsBoardContext? context,
+            GameplayCoreSceneSetupData? gameplayCoreSceneSetupData,
+            AudioTimeSyncController? audioTimeSyncController
         )
         {
             this.logger = logger;
@@ -238,7 +238,6 @@ namespace LyricsBoard.View
             if (songHash is null)
             {
                 logger?.Info($"Failed to get song hash from level ID [{levelId}]. ");
-                return null;
             }
 
             var calc = context.GetLyricsProgressCalculator(songHash);
