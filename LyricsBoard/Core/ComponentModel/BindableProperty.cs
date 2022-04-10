@@ -56,25 +56,4 @@ namespace LyricsBoard.Core.ComponentModel
             }
         }
     }
-
-    internal static class StrongBindableExtensions
-    {
-        public static BindableProperty<TProperty> ToBindableProperty<TSubject, TProperty>(
-            this TSubject bindTarget,
-            Func<TSubject, TProperty> sourceGetter,
-            Action<TSubject, TProperty> sourceSetter,
-            Action notifier
-        )
-            where TSubject : INotifyPropertyChanged
-        {
-            return new BindableProperty<TProperty>(
-                bindTarget,
-                () => sourceGetter.Invoke(bindTarget),
-                (value) => sourceSetter?.Invoke(bindTarget, value),
-                notifier,
-                sourceGetter.Invoke(bindTarget)
-            );
-        }
-
-    }
 }
