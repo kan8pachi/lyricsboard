@@ -1,9 +1,6 @@
 ﻿using FluentAssertions;
 using LyricsBoard.Core;
-using LyricsBoard.Core.System;
-using Moq;
 using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 
 namespace LyricsBoard.Test.Core
