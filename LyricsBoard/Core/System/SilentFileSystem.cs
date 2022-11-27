@@ -19,6 +19,8 @@ namespace LyricsBoard.Core.System
         string ReadTextAllOrEmpty(string path);
 
         List<string>? ReatTextLinesOrNull(string path);
+
+        IEnumerable<(string, string?)> EnumerateFilesAllWithExtPair(string path, string ext1, string ext2);
     }
 
     internal class SilentFileSystem : IFileSystem
@@ -105,6 +107,25 @@ namespace LyricsBoard.Core.System
                 path,
                 x => File.ReadAllLines(x).ToList()
             );
+        }
+
+        public IEnumerable<(string, string?)> EnumerateFilesAllWithExtPair(string path, string ext1, string ext2)
+        {
+            var searchPattern = "*" + ext1;
+            var files = Directory.EnumerateFiles(path, searchPattern, SearchOption.AllDirectories);
+
+            // we need to loop by for in stead of LINQ because (string, string?) is difficult to infer for LINQ select.
+            foreach (var file1 in files)
+            {
+                // need to remove files with wrong extension.
+                // Directory.EnumerateFiles includes "abc.docx" even when specified "*.doc" to searchPattern.
+                if (file1.EndsWith(ext1))
+                {
+                    var file2_c = Path.ChangeExtension(file1, ext2);
+                    var file2 = File.Exists(file2_c) ? file2_c : null;
+                    yield return (file1, file2);
+                }
+            }
         }
     }
 }

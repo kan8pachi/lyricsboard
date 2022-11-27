@@ -16,7 +16,6 @@ namespace LyricsBoard.Test.Core
             actual.MaxExpirationMs.Should().BeNull();
             actual.AnimationDurationMs.Should().BeNull();
             actual.StandbyDurationMs.Should().BeNull();
-            actual.CustomLrcFileName.Should().BeNull();
             actual.Lyrics.Should().BeNull();
         }
     }

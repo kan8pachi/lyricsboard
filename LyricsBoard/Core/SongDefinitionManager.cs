@@ -14,6 +14,7 @@ namespace LyricsBoard.Core
         {
             songCache = new LRUMemoryCache<string, SongDefinition>(cacheCapacity);
             this.sdLoader = sdLoader;
+            sdLoader.BuildSongCatalog();
         }
 
         /// <summary>
@@ -33,6 +34,7 @@ namespace LyricsBoard.Core
         public void ClearSongCache()
         {
             songCache.Clear();
+            sdLoader.BuildSongCatalog();
         }
     }
 }

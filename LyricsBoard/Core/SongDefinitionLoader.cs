@@ -1,28 +1,53 @@
 ﻿using LyricsBoard.Core.Extension;
 using LyricsBoard.Core.System;
-using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace LyricsBoard.Core
 {
     internal interface ISongDefinitionLoader
     {
         public SongDefinition LoadByHash(string songHash);
+        public Task<int> BuildSongCatalogAsync();
+        public int BuildSongCatalog();
     }
 
     internal class SongDefinitionLoader : ISongDefinitionLoader
     {
+        private record SongCatalogEntry(string lrcFile, string? defFile);
+
         private readonly IFileSystem fs;
         private readonly IJson json;
         private readonly string folder;
+        private Dictionary<string, SongCatalogEntry> songCatalog;
 
         public SongDefinitionLoader(IFileSystem fs, IJson json, string folder)
         {
             this.fs = fs;
             this.json = json;
             this.folder = folder;
+            songCatalog = new Dictionary<string, SongCatalogEntry>();
+        }
+
+        public Task<int> BuildSongCatalogAsync()
+        {
+            songCatalog = new Dictionary<string, SongCatalogEntry>();
+            return Task.Run(BuildSongCatalog);
+        }
+
+        public int BuildSongCatalog()
+        {
+            var newSongCatalog = new Dictionary<string, SongCatalogEntry>();
+            var fileset = fs.EnumerateFilesAllWithExtPair(folder, ".lrc", ".json");
+            foreach (var filepair in fileset)
+            {
+                var entry = new SongCatalogEntry(filepair.Item1, filepair.Item2);
+                var hash = Path.GetFileNameWithoutExtension(filepair.Item1);
+                newSongCatalog.Add(hash, entry);
+            }
+            this.songCatalog = newSongCatalog;
+            return newSongCatalog.Count;
         }
 
         /// <summary>
@@ -32,17 +57,22 @@ namespace LyricsBoard.Core
         /// <returns>SongDefinition instance. Never be null.</returns>
         public SongDefinition LoadByHash(string songHash)
         {
-            var defFilepath = Path.Combine(folder, $"{songHash}.json");
+            var catalogEntry = songCatalog.TryGetValue(songHash, out var result) ? result : null;
+            if (catalogEntry == null)
+            {
+                return new SongDefinition(songHash);
+            }
 
             // Load custom def file.
-            var def = LoadCustomDefinition(defFilepath, songHash);
+            var songDefinition = catalogEntry.defFile is null
+                ? new SongDefinition(songHash)
+                : LoadCustomDefinition(catalogEntry.defFile, songHash);
 
             // Load LRC file.
-            var lrcFilename = def.CustomLrcFileName is null ? $"{songHash}.lrc" : def.CustomLrcFileName;
-            var lrcLoader = new LrcLoader(fs, folder);
-            var lrc = lrcLoader.LoadFromFileOrNull(lrcFilename);
+            var lrcLoader = new LrcLoader(fs);
+            var lrc = lrcLoader.LoadFromFileOrNull(catalogEntry.lrcFile);
 
-            return def with { Lyrics = lrc };
+            return songDefinition with { Lyrics = lrc };
         }
 
         /// <summary>
@@ -83,8 +113,7 @@ namespace LyricsBoard.Core
                 PrimitiveParser.ParseIntOrDefault(deserialized?.GetOrDefault("OffsetMs", null), null),
                 PrimitiveParser.ParseIntOrDefault(deserialized?.GetOrDefault("MaxExpirationMs", null), null),
                 PrimitiveParser.ParseIntOrDefault(deserialized?.GetOrDefault("AnimationDurationMs", null), null),
-                PrimitiveParser.ParseIntOrDefault(deserialized?.GetOrDefault("StandbyDurationMs", null), null),
-                deserialized?.GetOrDefault("CustomLrcFileName", null)
+                PrimitiveParser.ParseIntOrDefault(deserialized?.GetOrDefault("StandbyDurationMs", null), null)
             );
         }
 
@@ -93,8 +122,7 @@ namespace LyricsBoard.Core
             int? offsetMs,
             int? maxExpirationMs,
             int? animationDurationMs,
-            int? standbyDurationMs,
-            string? customLrcFileName
+            int? standbyDurationMs
         )
         {
             return new SongDefinition(
@@ -103,7 +131,6 @@ namespace LyricsBoard.Core
                 MathN.ClampNullable(maxExpirationMs, 100, 3600 * 1000),
                 MathN.ClampNullable(animationDurationMs, 0, 60 * 1000),
                 MathN.ClampNullable(standbyDurationMs, 0, 3600 * 1000),
-                customLrcFileName,
                 null
             );
         }

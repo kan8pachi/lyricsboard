@@ -6,10 +6,9 @@
         int? MaxExpirationMs,
         int? AnimationDurationMs,
         int? StandbyDurationMs,
-        string? CustomLrcFileName,
         Lyrics? Lyrics
     )
     {
-        public SongDefinition(string SongHash) : this(SongHash, null, null, null, null, null, null) { }
+        public SongDefinition(string SongHash) : this(SongHash, null, null, null, null, null) { }
     }
 }

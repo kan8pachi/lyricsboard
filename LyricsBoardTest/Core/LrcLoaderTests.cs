@@ -21,7 +21,7 @@ namespace LyricsBoard.Test.Core
         [InlineData("[01:02][05:20]multiple time", 62000, "[05:20]multiple time")]
         public void ParseLine_Valid(string input, long expectTime, string expectText)
         {
-            var loader = new LrcLoader(Mock.Of<IFileSystem>(), "folder");
+            var loader = new LrcLoader(Mock.Of<IFileSystem>());
 
             var actual = loader.ParseLine(input)!;
             actual.TimeMs.Should().Be(expectTime);
@@ -36,7 +36,7 @@ namespace LyricsBoard.Test.Core
         [InlineData("[01:[02]syntax error")]
         public void ParseLine_Invalid(string input)
         {
-            var loader = new LrcLoader(Mock.Of<IFileSystem>(), "folder");
+            var loader = new LrcLoader(Mock.Of<IFileSystem>());
 
             var actual = loader.ParseLine(input);
             actual.Should().BeNull();
@@ -45,7 +45,7 @@ namespace LyricsBoard.Test.Core
         [Fact]
         public void Parse_NullExtracted()
         {
-            var loader = new LrcLoader(Mock.Of<IFileSystem>(), "folder");
+            var loader = new LrcLoader(Mock.Of<IFileSystem>());
 
             var input = new string[] {
                 "invalid line",
@@ -67,9 +67,9 @@ namespace LyricsBoard.Test.Core
             ).Returns(
                 new List<string>() { "[01:01]valid line 1" }
             );
-            var loader = new LrcLoader(mfs.Object, "folder");
+            var loader = new LrcLoader(mfs.Object);
 
-            var actual = loader.LoadFromFileOrNull("testpath")!;
+            var actual = loader.LoadFromFileOrNull("folder\\testpath")!;
 
             actual.Lines.Should().HaveCount(1);
             var first = actual.Lines.First();
@@ -87,9 +87,9 @@ namespace LyricsBoard.Test.Core
             mfs.Setup(
                 x => x.ReatTextLinesOrNull("folder\\testpath")
             ).Returns(() => null);
-            var loader = new LrcLoader(mfs.Object, "folder");
+            var loader = new LrcLoader(mfs.Object);
 
-            var actual = loader.LoadFromFileOrNull("testpath");
+            var actual = loader.LoadFromFileOrNull("folder\\testpath");
 
             actual.Should().BeNull();
             mfs.Verify(
