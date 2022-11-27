@@ -1,5 +1,6 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.GameplaySetup;
+using BeatSaberMarkupLanguage.Settings;
 using LyricsBoard.ComponentModel;
 using LyricsBoard.Core;
 using LyricsBoard.Core.ComponentModel;
@@ -248,16 +249,19 @@ namespace LyricsBoard.View
         {
             host = new(logger, context);
 
-            GameplaySetup.instance.AddTab(tabName, resourceMenuBsml, host);
+            //GameplaySetup.instance.AddTab(tabName, resourceMenuBsml, host);
+            BSMLSettings.instance.AddSettingsMenu(tabName, resourceMenuBsml, host);
         }
 
         public void Dispose()
         {
-            if (GameplaySetup.IsSingletonAvailable)
-            {
-                GameplaySetup.instance.RemoveTab(tabName);
-            }
+            //if (GameplaySetup.IsSingletonAvailable)
+            //{
+            //    GameplaySetup.instance.RemoveTab(tabName);
+            //}
+            BSMLSettings.instance.RemoveSettingsMenu(host);
             host?.Dispose();
+            host = null;
         }
     }
 }

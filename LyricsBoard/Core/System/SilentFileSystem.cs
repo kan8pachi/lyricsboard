@@ -41,6 +41,7 @@ namespace LyricsBoard.Core.System
 
             try
             {
+                // note that creating directory is an asynchronous operation.
                 Directory.CreateDirectory(path);
             }
             catch (Exception ex) when (
@@ -54,12 +55,6 @@ namespace LyricsBoard.Core.System
             )
             {
                 logger?.Warn($"Failed to create directory ({path}) due to unexpected reason: " + ex.ToString());
-                return false;
-            }
-
-            if (!Directory.Exists(path))
-            {
-                logger?.Warn($"Created directory ({path}) not found. Why??????");
                 return false;
             }
 
