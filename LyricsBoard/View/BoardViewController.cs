@@ -6,6 +6,7 @@ using SiraUtil.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -178,25 +179,28 @@ namespace LyricsBoard.View
 
             var conf = context.Config;
 
-            calculator = GetCalculatorForPlayingSong();
-            if (calculator is null)
-            {
-                IsWorking = false;
-                return;
-            }
-
             var boardPosition = new Vector3(conf.BoardPositionX, conf.BoardPositionY, conf.BoardPositionZ);
 
             // I could not find the way to show a BSML-ed display window in the mid air, so create it by myself.
             // I would like to replace it in the future. 
             canvas = new BoardCanvas(boardPosition, conf.BoardWidth, conf.FontSize, conf.ShowBoardBackground);
 
-            IsReady = true;
+            GetCalculatorForPlayingSongAsync().ContinueWith(t =>
+            {
+                // set calculator after async method returns the result.
+                var _calc = t.Result;
+                if (_calc is null)
+                {
+                    return;
+                }
+                calculator = _calc;
+                IsReady = true;
+            });
         }
 
         public void Dispose()
         {
-            if (!IsWorking) { return; }
+            if (!IsReady) { return; }
         }
 
         public void Tick()
@@ -205,13 +209,13 @@ namespace LyricsBoard.View
             if (calculator is null)
             {
                 logger?.Error(nameof(calculator) + " was null. Stop working due to unexpected error.");
-                IsWorking = false;
+                IsReady = false;
                 return;
             }
             if (canvas is null)
             {
                 logger?.Error(nameof(canvas) + " was null.  Stop working due to unexpected error.");
-                IsWorking = false;
+                IsReady = false;
                 return;
             }
 
@@ -225,7 +229,7 @@ namespace LyricsBoard.View
         /// Load lyrics and return animation calculator.
         /// </summary>
         /// <returns>calculator. may be null</returns>
-        private ProgressCalculator? GetCalculatorForPlayingSong()
+        private async Task<ProgressCalculator?> GetCalculatorForPlayingSongAsync()
         {
             var levelId = gameplayCoreSceneSetupData.difficultyBeatmap.level.levelID;
 
@@ -240,7 +244,7 @@ namespace LyricsBoard.View
                 logger?.Info($"Failed to get song hash from level ID [{levelId}]. ");
             }
 
-            var calc = context.GetLyricsProgressCalculator(songHash);
+            var calc = await context.GetLyricsProgressCalculatorAsync(songHash);
             if (calc is null)
             {
                 logger?.Info($"Lyrics file not found for current song [{songHash}].");

@@ -27,7 +27,7 @@ namespace LyricsBoard.Test.Core
         }
     }
 
-    public class SongDefinitionLoaderTests
+    public class SongCatalogTests
     {
         private readonly IJson json = new UnityIndependentSilentJson();
         private readonly string fullJson = "{OffsetMs:300, MaxExpirationMs:250, AnimationDurationMs:200, StandbyDurationMs:800}";
@@ -39,9 +39,9 @@ namespace LyricsBoard.Test.Core
         [InlineData("{OffsetMs:300")]
         public void Parse_Empty(string input)
         {
-            var loader = new SongDefinitionLoader(Mock.Of<IFileSystem>(), json, "dummy");
+            var catalog = new SongCatalog(new Dictionary<string, SongCatalogEntry>(), Mock.Of<IFileSystem>(), json);
 
-            var actual = loader.ParseCustomDefinition("hash", input);
+            var actual = catalog.ParseCustomDefinition("hash", input);
 
             actual.Should().NotBeNull();
             actual.SongHash.Should().Be("hash");
@@ -55,9 +55,9 @@ namespace LyricsBoard.Test.Core
         [Fact]
         public void Parse_Full()
         {
-            var loader = new SongDefinitionLoader(Mock.Of<IFileSystem>(), json, "dummy");
+            var catalog = new SongCatalog(new Dictionary<string, SongCatalogEntry>(), Mock.Of<IFileSystem>(), json);
 
-            var actual = loader.ParseCustomDefinition("hash", fullJson);
+            var actual = catalog.ParseCustomDefinition("hash", fullJson);
 
             actual.Should().NotBeNull();
             actual.SongHash.Should().Be("hash");
@@ -73,9 +73,9 @@ namespace LyricsBoard.Test.Core
         {
             var mfs = new Mock<IFileSystem>();
             mfs.Setup(x => x.ReadTextAllOrEmpty("filepath")).Returns(fullJson);
-            var loader = new SongDefinitionLoader(mfs.Object, json, "dummy");
+            var catalog = new SongCatalog(new Dictionary<string, SongCatalogEntry>(), mfs.Object, json);
 
-            var actual = loader.LoadCustomDefinition("filepath", "hash");
+            var actual = catalog.LoadCustomDefinition("filepath", "hash");
             actual.SongHash.Should().Be("hash");
         }
 
@@ -89,9 +89,9 @@ namespace LyricsBoard.Test.Core
                 ("rootfolder\\songhash.lrc", "rootfolder\\songhash.json")
             });
             var loader = new SongDefinitionLoader(mfs.Object, json, "rootfolder");
-            loader.BuildSongCatalogAsync().Wait();
+            var catalog = loader.BuildSongCatalog();
 
-            var actual = loader.LoadByHash("songhash");
+            var actual = catalog.LoadByHash("songhash");
 
             actual.SongHash.Should().Be("songhash");
             actual.OffsetMs.Should().Be(300);
@@ -117,9 +117,9 @@ namespace LyricsBoard.Test.Core
                 ("rootfolder\\songhash.lrc", null)
             });
             var loader = new SongDefinitionLoader(mfs.Object, json, "rootfolder");
-            loader.BuildSongCatalogAsync().Wait();
+            var catalog = loader.BuildSongCatalog();
 
-            var actual = loader.LoadByHash("songhash");
+            var actual = catalog.LoadByHash("songhash");
 
             actual.SongHash.Should().Be("songhash");
             actual.Lyrics.Should().NotBeNull();
@@ -137,8 +137,8 @@ namespace LyricsBoard.Test.Core
         [Fact]
         public void GenerateSafely_Fill()
         {
-            var loader = new SongDefinitionLoader(Mock.Of<IFileSystem>(), json, "rootfolder");
-            var actual = loader.GenerateCustomDefinitionSafely("songhash", 100, 200, 300, 400);
+            var catalog = new SongCatalog(new Dictionary<string, SongCatalogEntry>(), Mock.Of<IFileSystem>(), json);
+            var actual = catalog.GenerateCustomDefinitionSafely("songhash", 100, 200, 300, 400);
 
             actual.SongHash.Should().Be("songhash");
             actual.OffsetMs.Should().Be(100);
@@ -150,8 +150,8 @@ namespace LyricsBoard.Test.Core
         [Fact]
         public void GenerateSafely_ClampUpper()
         {
-            var loader = new SongDefinitionLoader(Mock.Of<IFileSystem>(), json, "rootfolder");
-            var actual = loader.GenerateCustomDefinitionSafely("songhash", 3600001, 3600001, 60001, 3600001);
+            var catalog = new SongCatalog(new Dictionary<string, SongCatalogEntry>(), Mock.Of<IFileSystem>(), json);
+            var actual = catalog.GenerateCustomDefinitionSafely("songhash", 3600001, 3600001, 60001, 3600001);
 
             actual.SongHash.Should().Be("songhash");
             actual.OffsetMs.Should().Be(3600000);
@@ -163,8 +163,8 @@ namespace LyricsBoard.Test.Core
         [Fact]
         public void GenerateSafely_ClampLower()
         {
-            var loader = new SongDefinitionLoader(Mock.Of<IFileSystem>(), json, "rootfolder");
-            var actual = loader.GenerateCustomDefinitionSafely("songhash", -3600001, 99, -1, -1);
+            var catalog = new SongCatalog(new Dictionary<string, SongCatalogEntry>(), Mock.Of<IFileSystem>(), json);
+            var actual = catalog.GenerateCustomDefinitionSafely("songhash", -3600001, 99, -1, -1);
 
             actual.SongHash.Should().Be("songhash");
             actual.OffsetMs.Should().Be(-3600000);

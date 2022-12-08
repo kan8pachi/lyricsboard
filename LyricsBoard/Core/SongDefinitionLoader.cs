@@ -6,37 +6,32 @@ using System.Threading.Tasks;
 
 namespace LyricsBoard.Core
 {
-    internal interface ISongDefinitionLoader
+    internal interface ISongCatalog
     {
         public SongDefinition LoadByHash(string songHash);
-        public Task<int> BuildSongCatalogAsync();
-        public int BuildSongCatalog();
     }
+
+    internal interface ISongDefinitionLoader
+    {
+        public ISongCatalog BuildSongCatalog();
+    }
+
+    internal record SongCatalogEntry(string lrcFile, string? defFile);
 
     internal class SongDefinitionLoader : ISongDefinitionLoader
     {
-        private record SongCatalogEntry(string lrcFile, string? defFile);
-
         private readonly IFileSystem fs;
         private readonly IJson json;
         private readonly string folder;
-        private Dictionary<string, SongCatalogEntry> songCatalog;
 
         public SongDefinitionLoader(IFileSystem fs, IJson json, string folder)
         {
             this.fs = fs;
             this.json = json;
             this.folder = folder;
-            songCatalog = new Dictionary<string, SongCatalogEntry>();
         }
 
-        public Task<int> BuildSongCatalogAsync()
-        {
-            songCatalog = new Dictionary<string, SongCatalogEntry>();
-            return Task.Run(BuildSongCatalog);
-        }
-
-        public int BuildSongCatalog()
+        public ISongCatalog BuildSongCatalog()
         {
             var newSongCatalog = new Dictionary<string, SongCatalogEntry>();
             var fileset = fs.EnumerateFilesAllWithExtPair(folder, ".lrc", ".json");
@@ -46,8 +41,21 @@ namespace LyricsBoard.Core
                 var hash = Path.GetFileNameWithoutExtension(filepair.Item1);
                 newSongCatalog.Add(hash, entry);
             }
-            this.songCatalog = newSongCatalog;
-            return newSongCatalog.Count;
+            return new SongCatalog(newSongCatalog, fs, json);
+        }
+    }
+
+    class SongCatalog : ISongCatalog
+    {
+        private Dictionary<string, SongCatalogEntry> catalog;
+        private readonly IFileSystem fs;
+        private readonly IJson json;
+
+        public SongCatalog(Dictionary<string, SongCatalogEntry> catalog, IFileSystem fs, IJson json)
+        {
+            this.catalog = catalog;
+            this.fs = fs;
+            this.json = json;
         }
 
         /// <summary>
@@ -57,7 +65,7 @@ namespace LyricsBoard.Core
         /// <returns>SongDefinition instance. Never be null.</returns>
         public SongDefinition LoadByHash(string songHash)
         {
-            var catalogEntry = songCatalog.TryGetValue(songHash, out var result) ? result : null;
+            var catalogEntry = catalog.TryGetValue(songHash, out var result) ? result : null;
             if (catalogEntry == null)
             {
                 return new SongDefinition(songHash);

@@ -41,7 +41,6 @@ namespace LyricsBoard.Core.System
 
             try
             {
-                // note that creating directory is an asynchronous operation.
                 Directory.CreateDirectory(path);
             }
             catch (Exception ex) when (

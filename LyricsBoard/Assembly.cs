@@ -1,10 +1,8 @@
 ﻿using System.Runtime.CompilerServices;
 
-#if DEBUG
 // to make "internal" testable.
 [assembly: InternalsVisibleTo("LyricsBoardTest")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
-#endif
 
 #if !NET5_0_OR_GREATER
 namespace System.Runtime.CompilerServices
