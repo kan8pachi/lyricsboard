@@ -10,34 +10,40 @@ namespace LyricsBoard.Test.Core
         [Fact]
         public void GetSongDefinition_NotInCache()
         {
-            var m = new Mock<ISongDefinitionLoader>();
-            m.Setup(x => x.LoadByHash("hash")).Returns(new SongDefinition("hash"));
+            var mCatalog = new Mock<ISongCatalog>();
+            mCatalog.Setup(x => x.LoadByHash("hash")).Returns(new SongDefinition("hash"));
+            var mBuilder = new Mock<ISongCatalogBuilder>();
+            mBuilder.Setup(x => x.Build()).Returns(mCatalog.Object);
 
-            var manager = new SongDefinitionManager(m.Object, 10);
-            var actual = manager.GetSongDefinition("hash");
+            var manager = new SongDefinitionManager(null, mBuilder.Object, 10);
+            manager.InitializeAsync().Wait();
+            var actual = manager.GetSongDefinition("hash").Result;
             
             actual.Should().NotBeNull();
             actual.SongHash.Should().Be("hash");
 
-            m.VerifyAll();
+            mBuilder.VerifyAll();
         }
 
         [Fact]
         public void GetSongDefinition_AlreadyInCache()
         {
-            var m = new Mock<ISongDefinitionLoader>();
-            m.Setup(x => x.LoadByHash("hash")).Returns(new SongDefinition("hash"));
-            m.Setup(x => x.LoadByHash("hash2")).Returns(new SongDefinition("hash2"));
+            var mCatalog = new Mock<ISongCatalog>();
+            mCatalog.Setup(x => x.LoadByHash("hash")).Returns(new SongDefinition("hash"));
+            mCatalog.Setup(x => x.LoadByHash("hash2")).Returns(new SongDefinition("hash2"));
+            var mBuilder = new Mock<ISongCatalogBuilder>();
+            mBuilder.Setup(x => x.Build()).Returns(mCatalog.Object);
 
-            var manager = new SongDefinitionManager(m.Object, 10);
-            manager.GetSongDefinition("hash");
-            manager.GetSongDefinition("hash2");
-            var actual = manager.GetSongDefinition("hash");
+            var manager = new SongDefinitionManager(null, mBuilder.Object, 10);
+            manager.InitializeAsync().Wait();
+            _ = manager.GetSongDefinition("hash").Result;
+            _ = manager.GetSongDefinition("hash2").Result;
+            var actual = manager.GetSongDefinition("hash").Result;
 
             actual.Should().NotBeNull();
             actual.SongHash.Should().Be("hash");
 
-            //m.Verify(x => x.Load("hash"), Times.Once());
+            mCatalog.Verify(x => x.LoadByHash("hash"), Times.Once());
         }
     }
 }

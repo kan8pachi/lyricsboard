@@ -134,7 +134,7 @@ namespace LyricsBoard.View
             [UIAction("clear-cache")]
             public void ClearCache()
             {
-                context.ClearSongCache();
+                _ = context.ClearSongCacheAsync();
             }
 
             private BindableProperty<bool> showDebugLyrics;

@@ -1,11 +1,13 @@
 ﻿using IPA.Utilities;
 using LyricsBoard.Configuration;
+using LyricsBoard.Core.Logging.Extension;
 using LyricsBoard.Core.System;
 using SiraUtil.Logging;
 using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace LyricsBoard.Core
 {
@@ -39,8 +41,12 @@ namespace LyricsBoard.Core
             var dataFolder = Path.Combine(ourFolder, "lyrics");
 
             testSong = SongDefinitionDummyGenerator.GenerateDummySong();
-            var sdLoader = new SongDefinitionLoader(fs, json, dataFolder);
-            songManager = new SongDefinitionManager(sdLoader, Config.CacheSize);
+            var catalogBuilder = new SongCatalogBuilder(fs, json, dataFolder);
+            songManager = new SongDefinitionManager(
+                logger?.GetChildK8Logger(nameof(SongDefinitionManager)),
+                catalogBuilder,
+                Config.CacheSize
+            );
 
             var result = PrepareDataFolder(rootFolder, dataFolder);
             if (!result)
@@ -49,6 +55,7 @@ namespace LyricsBoard.Core
                 return;
             }
 
+            _ = songManager.InitializeAsync();
             IsWorking = true;
         }
 
@@ -108,20 +115,27 @@ namespace LyricsBoard.Core
         /// </summary>
         /// <param name="songId">song hash</param>
         /// <returns>calculator. may be null.</returns>
-        public ProgressCalculator? GetLyricsProgressCalculator(string? songId)
+        public async Task<ProgressCalculator?> GetLyricsProgressCalculatorAsync(string? songId)
         {
             if (!AssertIfWorking()) { return null; }
 
             var sd = songId is null
                 ? null
-                : songManager.GetSongDefinition(songId);
+                : await songManager.GetSongDefinition(songId);
 
-            if (Config.ShowDebugLyrics)
+            if(sd is null || sd.Lyrics is null)
             {
-                sd ??= testSong;
+                if (Config.ShowDebugLyrics)
+                {
+                    sd = testSong;
+                }
+                else
+                {
+                    return null;
+                }
+
             }
 
-            if (sd is null) { return null; }
             return GetLyricsProgressCalculatorFromSongDefinition(sd);
         }
 
@@ -140,9 +154,9 @@ namespace LyricsBoard.Core
             return calculator;
         }
 
-        public void ClearSongCache()
+        public async Task ClearSongCacheAsync()
         {
-            songManager.ClearSongCache();
+            await songManager.ReloadAsync();
         }
     }
 }

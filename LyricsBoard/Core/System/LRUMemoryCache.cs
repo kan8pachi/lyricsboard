@@ -66,5 +66,10 @@ namespace LyricsBoard.Core.System
             lru.Clear();
             cache.Clear();
         }
+
+        public int Capacity
+        {
+            get { return capacity; }
+        }
     }
 }

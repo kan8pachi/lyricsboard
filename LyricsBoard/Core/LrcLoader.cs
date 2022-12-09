@@ -11,15 +11,13 @@ namespace LyricsBoard.Core
     {
         private readonly Regex rxLine = new Regex(@"^\[(?<min>\d+):(?<sec>\d{1,2})([\.:](?<msc>\d{2}))?\](?<txt>.*)$");
         private readonly IFileSystem fs;
-        private readonly string folder;
 
         // TODO: implement it. Always empty for now.
         public List<string> Errors { get; private set; }
 
-        public LrcLoader(IFileSystem fs, string folder)
+        public LrcLoader(IFileSystem fs)
         {
             this.fs = fs;
-            this.folder = folder;
             Errors = new List<string>();
         }
 
@@ -81,9 +79,8 @@ namespace LyricsBoard.Core
         /// </summary>
         /// <param name="filepath"></param>
         /// <returns>Lrc instance, or null when file not found</returns>
-        public Lyrics? LoadFromFileOrNull(string filename)
+        public Lyrics? LoadFromFileOrNull(string filepath)
         {
-            var filepath = Path.Combine(folder, filename);
             var lines = fs.ReatTextLinesOrNull(filepath);
             return lines is null ? null : Parse(lines);
         }
