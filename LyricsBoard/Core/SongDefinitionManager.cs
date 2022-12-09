@@ -55,14 +55,14 @@ namespace LyricsBoard.Core
 
         private K8Logger? logger;
         private LRUMemoryCache<string, Task<SongDefinition>> songCache;
-        private readonly ISongDefinitionLoader sdLoader;
+        private readonly ISongCatalogBuilder catalogBuilder;
         private CancellableTask<ISongCatalog>? songCatalogTask;
 
-        public SongDefinitionManager(K8Logger? logger, ISongDefinitionLoader sdLoader, int cacheCapacity)
+        public SongDefinitionManager(K8Logger? logger, ISongCatalogBuilder catalogBuilder, int cacheCapacity)
         {
             this.logger = logger;
             songCache = new LRUMemoryCache<string, Task<SongDefinition>>(cacheCapacity);
-            this.sdLoader = sdLoader;
+            this.catalogBuilder = catalogBuilder;
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace LyricsBoard.Core
                 songCatalogTask = null;
                 logger?.Info("finished cancelling previous catalog loading task.");
             }
-            var newTask = CancellableTask<ISongCatalog>.Run(() => sdLoader.BuildSongCatalog());
+            var newTask = CancellableTask<ISongCatalog>.Run(() => catalogBuilder.Build());
 
             songCatalogTask = newTask;
             await newTask.TTask;

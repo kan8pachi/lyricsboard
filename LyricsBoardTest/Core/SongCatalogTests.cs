@@ -88,8 +88,8 @@ namespace LyricsBoard.Test.Core
             mfs.Setup(x => x.EnumerateFilesAllWithExtPair("rootfolder", ".lrc", ".json")).Returns(new List<(string, string?)>() {
                 ("rootfolder\\songhash.lrc", "rootfolder\\songhash.json")
             });
-            var loader = new SongDefinitionLoader(mfs.Object, json, "rootfolder");
-            var catalog = loader.BuildSongCatalog();
+            var builder = new SongCatalogBuilder(mfs.Object, json, "rootfolder");
+            var catalog = builder.Build();
 
             var actual = catalog.LoadByHash("songhash");
 
@@ -116,8 +116,8 @@ namespace LyricsBoard.Test.Core
             mfs.Setup(x => x.EnumerateFilesAllWithExtPair("rootfolder", ".lrc", ".json")).Returns(new List<(string, string?)>() {
                 ("rootfolder\\songhash.lrc", null)
             });
-            var loader = new SongDefinitionLoader(mfs.Object, json, "rootfolder");
-            var catalog = loader.BuildSongCatalog();
+            var builder = new SongCatalogBuilder(mfs.Object, json, "rootfolder");
+            var catalog = builder.Build();
 
             var actual = catalog.LoadByHash("songhash");
 

@@ -12,17 +12,17 @@ namespace LyricsBoard.Test.Core
         {
             var mCatalog = new Mock<ISongCatalog>();
             mCatalog.Setup(x => x.LoadByHash("hash")).Returns(new SongDefinition("hash"));
-            var mLoader = new Mock<ISongDefinitionLoader>();
-            mLoader.Setup(x => x.BuildSongCatalog()).Returns(mCatalog.Object);
+            var mBuilder = new Mock<ISongCatalogBuilder>();
+            mBuilder.Setup(x => x.Build()).Returns(mCatalog.Object);
 
-            var manager = new SongDefinitionManager(null, mLoader.Object, 10);
+            var manager = new SongDefinitionManager(null, mBuilder.Object, 10);
             manager.InitializeAsync().Wait();
             var actual = manager.GetSongDefinition("hash").Result;
             
             actual.Should().NotBeNull();
             actual.SongHash.Should().Be("hash");
 
-            mLoader.VerifyAll();
+            mBuilder.VerifyAll();
         }
 
         [Fact]
@@ -31,10 +31,10 @@ namespace LyricsBoard.Test.Core
             var mCatalog = new Mock<ISongCatalog>();
             mCatalog.Setup(x => x.LoadByHash("hash")).Returns(new SongDefinition("hash"));
             mCatalog.Setup(x => x.LoadByHash("hash2")).Returns(new SongDefinition("hash2"));
-            var mLoader = new Mock<ISongDefinitionLoader>();
-            mLoader.Setup(x => x.BuildSongCatalog()).Returns(mCatalog.Object);
+            var mBuilder = new Mock<ISongCatalogBuilder>();
+            mBuilder.Setup(x => x.Build()).Returns(mCatalog.Object);
 
-            var manager = new SongDefinitionManager(null, mLoader.Object, 10);
+            var manager = new SongDefinitionManager(null, mBuilder.Object, 10);
             manager.InitializeAsync().Wait();
             _ = manager.GetSongDefinition("hash").Result;
             _ = manager.GetSongDefinition("hash2").Result;

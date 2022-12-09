@@ -11,27 +11,27 @@ namespace LyricsBoard.Core
         public SongDefinition LoadByHash(string songHash);
     }
 
-    internal interface ISongDefinitionLoader
+    internal interface ISongCatalogBuilder
     {
-        public ISongCatalog BuildSongCatalog();
+        public ISongCatalog Build();
     }
 
     internal record SongCatalogEntry(string lrcFile, string? defFile);
 
-    internal class SongDefinitionLoader : ISongDefinitionLoader
+    internal class SongCatalogBuilder : ISongCatalogBuilder
     {
         private readonly IFileSystem fs;
         private readonly IJson json;
         private readonly string folder;
 
-        public SongDefinitionLoader(IFileSystem fs, IJson json, string folder)
+        public SongCatalogBuilder(IFileSystem fs, IJson json, string folder)
         {
             this.fs = fs;
             this.json = json;
             this.folder = folder;
         }
 
-        public ISongCatalog BuildSongCatalog()
+        public ISongCatalog Build()
         {
             var newSongCatalog = new Dictionary<string, SongCatalogEntry>();
             var fileset = fs.EnumerateFilesAllWithExtPair(folder, ".lrc", ".json");

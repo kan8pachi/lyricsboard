@@ -41,10 +41,10 @@ namespace LyricsBoard.Core
             var dataFolder = Path.Combine(ourFolder, "lyrics");
 
             testSong = SongDefinitionDummyGenerator.GenerateDummySong();
-            var sdLoader = new SongDefinitionLoader(fs, json, dataFolder);
+            var catalogBuilder = new SongCatalogBuilder(fs, json, dataFolder);
             songManager = new SongDefinitionManager(
                 logger?.GetChildK8Logger(nameof(SongDefinitionManager)),
-                sdLoader,
+                catalogBuilder,
                 Config.CacheSize
             );
 
