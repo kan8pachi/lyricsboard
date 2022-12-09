@@ -2,7 +2,7 @@
 using SiraUtil.Logging;
 using System;
 
-namespace LyricsBoard.Core.BeatSaber
+namespace LyricsBoard.Core.K8
 {
     // implement wrapper logger to make test project independent of IPA/SiraUtils related component.
     internal class K8Logger

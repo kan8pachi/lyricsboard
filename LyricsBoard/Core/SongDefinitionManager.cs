@@ -1,4 +1,4 @@
-﻿using LyricsBoard.Core.BeatSaber;
+﻿using LyricsBoard.Core.K8;
 using LyricsBoard.Core.System;
 using System;
 using System.Threading;
