@@ -43,6 +43,8 @@ The time tag comes at the head of the line, and the sentence of the lyrics follo
 
 The lyrics data will be loaded from this folder: `\steamapps\common\Beat Saber\UserData\LyricsBoard\lyrics`
 It will be generated automatically if not exist, so it is a good idea to launch Beat Saber once right after you install LyricsBoard.
+You can create any number of sub-folders in this folder.
+It might be easier to manage the lyrics if you create the folder with the same name as those in `CustomLevels`.
 
 LyricsBoard can recognise the following two style of lyrics data.
 
