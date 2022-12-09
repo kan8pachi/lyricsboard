@@ -11,7 +11,7 @@ namespace LyricsBoard.Test.Core
         public void GetPresentProgress_Single()
         {
             var lyrics = new Lyrics(new List<LyricsLine>() {
-                new LyricsLine(4000, "text1")
+                new LyricsLine(4000, new List<TimeTaggedText> { new(4000,"text1") })
             });
             var config = new ProgressCalculator.Config(3f, 0.2f, 1f);
             var calc = new ProgressCalculator(lyrics, config);

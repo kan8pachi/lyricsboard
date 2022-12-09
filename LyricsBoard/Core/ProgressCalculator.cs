@@ -60,7 +60,7 @@ namespace LyricsBoard.Core
 
         private Gen3Set<TimeMarkedTextList> BuildSearcher()
         {
-            if(lyrics.Lines.Count == 0)
+            if(lyrics.Lines.Count() == 0)
             {
                 var retiring = new TimeMarkedTextList(new List<TimeMarkedText>());
                 var current = new TimeMarkedTextList(new List<TimeMarkedText>());
@@ -72,7 +72,13 @@ namespace LyricsBoard.Core
                 .GroupBy(x => x.TimeMs)
                 .Select(x => x.Last())
                 .OrderBy(x => x.TimeMs)
-                .Select(x => new TimeSet(x.Text) { CurrentEnd = x.TimeMs / 1000f })
+                .Select(x =>
+                    new TimeSet(string.Join(
+                        "",
+                        x.Texts.Select(ttt => ttt.Text)
+                    ))
+                    { CurrentEnd = x.TimeMs / 1000f }
+                )
                 .ToList();
 
             /**

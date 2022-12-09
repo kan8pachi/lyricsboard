@@ -25,7 +25,8 @@ namespace LyricsBoard.Test.Core
 
             var actual = loader.ParseLine(input)!;
             actual.TimeMs.Should().Be(expectTime);
-            actual.Text.Should().Be(expectText);
+            actual.Texts.First().TimeMs.Should().Be(expectTime);
+            actual.Texts.First().Text.Should().Be(expectText);
         }
 
         [Theory]

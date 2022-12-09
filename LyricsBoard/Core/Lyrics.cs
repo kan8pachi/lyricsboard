@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace LyricsBoard.Core
 {
-    internal record LyricsLine(long TimeMs, string Text);
+    internal record TimeTaggedText(long TimeMs, string Text);
+    internal record LyricsLine(long TimeMs, IEnumerable<TimeTaggedText> Texts);
 
-    internal record Lyrics(List<LyricsLine> Lines);
+    internal record Lyrics(IEnumerable<LyricsLine> Lines);
 }

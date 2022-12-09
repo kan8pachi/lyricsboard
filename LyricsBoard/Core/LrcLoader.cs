@@ -56,7 +56,7 @@ namespace LyricsBoard.Core
             }
 
             long timeMs = (long)((min * 60 + sec) * 1000 + msc * 10);
-            return new LyricsLine(timeMs, stxt);
+            return new LyricsLine(timeMs, new List<TimeTaggedText>() { new(timeMs, stxt) });
         }
 
         /// <summary>
