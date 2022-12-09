@@ -1,8 +1,7 @@
 ﻿using IPA.Logging;
-using SiraUtil.Logging;
 using System;
 
-namespace LyricsBoard.Core.K8
+namespace LyricsBoard.Core.Logging
 {
     // implement wrapper logger to make test project independent of IPA/SiraUtils related component.
     internal class K8Logger
@@ -26,21 +25,6 @@ namespace LyricsBoard.Core.K8
         public K8Logger GetChildK8Logger(string name)
         {
             return new K8Logger(UpstreamLogger?.GetChildLogger(name));
-        }
-    }
-
-    internal static class K8LoggerExtention
-    {
-        public static K8Logger GetChildK8Logger(this SiraLog siraLog, string name)
-        {
-            var upstreamChildLogger = siraLog?.Logger?.GetChildLogger(name);
-            return new K8Logger(upstreamChildLogger);
-        }
-
-        public static K8Logger GetChildK8Logger(this Logger logger, string name)
-        {
-            var upstreamChildLogger = logger.GetChildLogger(name);
-            return new K8Logger(upstreamChildLogger);
         }
     }
 }

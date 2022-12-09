@@ -1,6 +1,6 @@
 ﻿using IPA.Utilities;
 using LyricsBoard.Configuration;
-using LyricsBoard.Core.K8;
+using LyricsBoard.Core.Logging.Extension;
 using LyricsBoard.Core.System;
 using SiraUtil.Logging;
 using System;
