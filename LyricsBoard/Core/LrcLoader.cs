@@ -1,5 +1,6 @@
 ﻿using LyricsBoard.Core.Extension;
 using LyricsBoard.Core.System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,7 +10,9 @@ namespace LyricsBoard.Core
 {
     internal class LrcLoader
     {
-        private readonly Regex rxLine = new Regex(@"^\[(?<min>\d+):(?<sec>\d{1,2})([\.:](?<msc>\d{2}))?\](?<txt>.*)$");
+        private readonly Regex exHead = new(@"^\[(\d+):(\d{1,2})([\.:](\d{2}))?\]");
+        private readonly Regex exMid = new(@"\[(?<min>\d+):(?<sec>\d{1,2})([\.:](?<msc>\d{2}))?\](?<txt>.*?)(?=\[(\d+):(\d{1,2})([\.:](\d{2}))?\])");
+        private readonly Regex exTail = new(@"\[(?<min>\d+):(?<sec>\d{1,2})([\.:](?<msc>\d{2}))?\](?<txt>.*?)$", RegexOptions.RightToLeft);
         private readonly IFileSystem fs;
 
         // TODO: implement it. Always empty for now.
@@ -28,35 +31,61 @@ namespace LyricsBoard.Core
         /// <returns>Parsed instance or null if failed.</returns>
         public LyricsLine? ParseLine(string line)
         {
-            var m = rxLine.Match(line);
-            if (!m.Success) { return null; }
+            Func<GroupCollection, TimeTaggedText?> f = (group) =>
+            {
+                var smin = group["min"].Value;
+                var ssec = group["sec"].Value;
+                var smsc = group["msc"].Value;
+                var stxt = group["txt"].Value;
 
-            var g = m.Groups;
-            var smin = g["min"].Value;
-            var ssec = g["sec"].Value;
-            var smsc = g["msc"].Value;
-            var stxt = g["txt"].Value;
+                var min = PrimitiveParser.ParseIntOrDefault(smin, null);
+                var sec = PrimitiveParser.ParseIntOrDefault(ssec, null);
+                var msc = string.IsNullOrEmpty(smsc) ? 0 : PrimitiveParser.ParseIntOrDefault(smsc, null);
 
-            var min = PrimitiveParser.ParseIntOrDefault(smin, null);
-            var sec = PrimitiveParser.ParseIntOrDefault(ssec, null);
-            var msc = string.IsNullOrEmpty(smsc) ? 0 : PrimitiveParser.ParseIntOrDefault(smsc, null);
+                // validate the range of the time.
+                if (min == null)
+                {
+                    return null;
+                }
+                if (sec == null || sec < 0 || sec > 59)
+                {
+                    return null;
+                }
+                if (msc == null || msc < 0 || msc > 99)
+                {
+                    return null;
+                }
 
-            // validate the range of the time.
-            if (min == null)
+                long timeMs = (long)((min * 60 + sec) * 1000 + msc * 10);
+                return new TimeTaggedText(timeMs, stxt);
+            };
+
+            // skip if line doesn't start from time tag.
+            var mHead = exHead.Match(line);
+            if (!mHead.Success)
             {
                 return null;
             }
-            if (sec == null || sec < 0 || sec > 59)
-            {
-                return null;
-            }
-            if (msc == null || msc < 0 || msc > 99)
-            {
-                return null;
-            }
 
-            long timeMs = (long)((min * 60 + sec) * 1000 + msc * 10);
-            return new LyricsLine(timeMs, new List<TimeTaggedText>() { new(timeMs, stxt) });
+            var mTail = exTail.Match(line);
+            if (!mTail.Success)
+            {
+                return null;
+            }
+            var resultTail = f(mTail.Groups);
+
+            var mMid = exMid.Matches(line);
+            var result = mMid.AsEnumerable<Match>()
+                .Select(x => f(x.Groups))
+                .Append(resultTail)
+                .WhereNotNull();
+
+            var resultFirst = result.FirstOrDefault();
+            if(resultFirst is null)
+            {
+                return null;
+            }
+            return new LyricsLine(resultFirst.TimeMs, result);
         }
 
         /// <summary>

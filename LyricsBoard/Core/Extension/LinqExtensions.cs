@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,5 +12,13 @@ namespace LyricsBoard.Core.Extension
 
         public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> that) where T : class
             => that.Where(x => x != null)!;
+
+        public static IEnumerable<T> AsEnumerable<T>(this IEnumerable collection)
+        {
+            foreach (var e in collection)
+            {
+                yield return (T)e;
+            }
+        }
     }
 }
