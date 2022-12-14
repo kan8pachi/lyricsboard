@@ -23,7 +23,7 @@ namespace LyricsBoard.Core
             var lines = timings.Zip(intervals, (timing, interval) => (timing, interval))
                 .Select(x => new LyricsLine(
                     x.timing,
-                    new List<TimeTaggedText> {
+                    new List<TimeTaggedChars> {
                         new (x.timing, $"{x.interval} ms: Lrc text. にほんごも使えるよ. long long long text follows here.")
                     }
                 ));

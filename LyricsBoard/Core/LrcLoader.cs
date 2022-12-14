@@ -31,7 +31,7 @@ namespace LyricsBoard.Core
         /// <returns>Parsed instance or null if failed.</returns>
         public LyricsLine? ParseLine(string line)
         {
-            Func<GroupCollection, TimeTaggedText?> f = (group) =>
+            Func<GroupCollection, TimeTaggedChars?> f = (group) =>
             {
                 var smin = group["min"].Value;
                 var ssec = group["sec"].Value;
@@ -57,7 +57,7 @@ namespace LyricsBoard.Core
                 }
 
                 long timeMs = (long)((min * 60 + sec) * 1000 + msc * 10);
-                return new TimeTaggedText(timeMs, stxt);
+                return new TimeTaggedChars(timeMs, stxt);
             };
 
             // skip if line doesn't start from time tag.
@@ -80,11 +80,13 @@ namespace LyricsBoard.Core
                 .Append(resultTail)
                 .WhereNotNull();
 
+            // skip if validation of all matches failed.
             var resultFirst = result.FirstOrDefault();
             if(resultFirst is null)
             {
                 return null;
             }
+
             return new LyricsLine(resultFirst.TimeMs, result);
         }
 

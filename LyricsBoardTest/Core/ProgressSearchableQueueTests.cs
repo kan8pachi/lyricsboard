@@ -5,14 +5,14 @@ using Xunit;
 
 namespace LyricsBoard.Test.Core
 {
-    public class TimeMarkedTextTests
+    public class ProgressSearchableEntryTests
     {
         [Theory]
         [InlineData(2.99f)]
         [InlineData(7.01f)]
         public void GetProgress_OutOfRange(float input)
         {
-            var text = new TimeMarkedText(3.0f, 5.0f, 7.0f, "text");
+            var text = new ProgressSearchableEntry(3.0f, 5.0f, 7.0f, "text");
             var actual = text.GetProgress(input);
 
             actual.Should().BeNull();
@@ -25,7 +25,7 @@ namespace LyricsBoard.Test.Core
         [InlineData(7.0f, 1f)]
         public void GetProgress_Work(float input, float expect)
         {
-            var text = new TimeMarkedText(3.0f, 5.0f, 7.0f, "text");
+            var text = new ProgressSearchableEntry(3.0f, 5.0f, 7.0f, "text");
             var actual = text.GetProgress(input);
 
             actual.Should().BeApproximately(expect, 0.0001f);
@@ -37,14 +37,14 @@ namespace LyricsBoard.Test.Core
         [InlineData(7.0f, 1f)]
         public void GetProgress_NoAnimation(float input, float expect)
         {
-            var text = new TimeMarkedText(3.0f, 3.0f, 7.0f, "text");
+            var text = new ProgressSearchableEntry(3.0f, 3.0f, 7.0f, "text");
             var actual = text.GetProgress(input);
 
             actual.Should().BeApproximately(expect, 0.0001f);
         }
     }
 
-    public class TimeMarkedTextListTests
+    public class ProgressSearchableQueueTests
     {
         public class PositionSearchTests
         {
@@ -58,7 +58,7 @@ namespace LyricsBoard.Test.Core
             [InlineData(8.0f, 2)]
             public void Search_Work(float input, int expect)
             {
-                var search = new TimeMarkedTextList.PositionSearch(new List<float>() { 3.0f, 5.0f, 7.0f });
+                var search = new ProgressSearchableQueue.PositionSearch(new List<float>() { 3.0f, 5.0f, 7.0f });
                 var actual = search.Search(input);
                 actual.Should().Be(expect);
             }
@@ -67,7 +67,7 @@ namespace LyricsBoard.Test.Core
         [Fact]
         public void Search_Empty()
         {
-            var list = new TimeMarkedTextList(new List<TimeMarkedText>());
+            var list = new ProgressSearchableQueue(new List<ProgressSearchableEntry>());
             var actual = list.Search(3f);
 
             actual.Progress.Should().BeNull();
@@ -77,10 +77,10 @@ namespace LyricsBoard.Test.Core
         [Fact]
         public void Search_BeforeFirst()
         {
-            var list = new TimeMarkedTextList(new List<TimeMarkedText>()
+            var list = new ProgressSearchableQueue(new List<ProgressSearchableEntry>()
             {
-                new TimeMarkedText(13f, 15f, 17f, "text1"),
-                new TimeMarkedText(23f, 25f, 27f, "text2")
+                new ProgressSearchableEntry(13f, 15f, 17f, "text1"),
+                new ProgressSearchableEntry(23f, 25f, 27f, "text2")
             });
             var actual = list.Search(12.99f);
 
@@ -91,10 +91,10 @@ namespace LyricsBoard.Test.Core
         [Fact]
         public void Search_AfterLast()
         {
-            var list = new TimeMarkedTextList(new List<TimeMarkedText>()
+            var list = new ProgressSearchableQueue(new List<ProgressSearchableEntry>()
             {
-                new TimeMarkedText(13f, 15f, 17f, "text1"),
-                new TimeMarkedText(23f, 25f, 27f, "text2")
+                new ProgressSearchableEntry(13f, 15f, 17f, "text1"),
+                new ProgressSearchableEntry(23f, 25f, 27f, "text2")
             });
             var actual = list.Search(27.01f);
 
@@ -112,11 +112,11 @@ namespace LyricsBoard.Test.Core
         [InlineData(33.5f, 0.25f, "text3")]
         public void Search_Valid(float input, float expectProgress, string expectText)
         {
-            var list = new TimeMarkedTextList(new List<TimeMarkedText>()
+            var list = new ProgressSearchableQueue(new List<ProgressSearchableEntry>()
             {
-                new TimeMarkedText(13f, 15f, 17f, "text1"),
-                new TimeMarkedText(23f, 25f, 27f, "text2"),
-                new TimeMarkedText(33f, 35f, 37f, "text3"),
+                new ProgressSearchableEntry(13f, 15f, 17f, "text1"),
+                new ProgressSearchableEntry(23f, 25f, 27f, "text2"),
+                new ProgressSearchableEntry(33f, 35f, 37f, "text3"),
             });
             var actual = list.Search(input);
 
@@ -130,11 +130,11 @@ namespace LyricsBoard.Test.Core
         [InlineData(33.5f, 0.25f, "text3")]
         public void Search_NotOrdered(float input, float expectProgress, string expectText)
         {
-            var list = new TimeMarkedTextList(new List<TimeMarkedText>()
+            var list = new ProgressSearchableQueue(new List<ProgressSearchableEntry>()
             {
-                new TimeMarkedText(33f, 35f, 37f, "text3"),
-                new TimeMarkedText(23f, 25f, 27f, "text2"),
-                new TimeMarkedText(13f, 15f, 17f, "text1"),
+                new ProgressSearchableEntry(33f, 35f, 37f, "text3"),
+                new ProgressSearchableEntry(23f, 25f, 27f, "text2"),
+                new ProgressSearchableEntry(13f, 15f, 17f, "text1"),
             });
             var actual = list.Search(input);
 
@@ -145,11 +145,11 @@ namespace LyricsBoard.Test.Core
         [Fact]
         public void Search_Continuous()
         {
-            var list = new TimeMarkedTextList(new List<TimeMarkedText>()
+            var list = new ProgressSearchableQueue(new List<ProgressSearchableEntry>()
             {
-                new TimeMarkedText(33f, 35f, 37f, "text3"),
-                new TimeMarkedText(23f, 25f, 27f, "text2"),
-                new TimeMarkedText(13f, 15f, 17f, "text1"),
+                new ProgressSearchableEntry(33f, 35f, 37f, "text3"),
+                new ProgressSearchableEntry(23f, 25f, 27f, "text2"),
+                new ProgressSearchableEntry(13f, 15f, 17f, "text1"),
             });
 
             {

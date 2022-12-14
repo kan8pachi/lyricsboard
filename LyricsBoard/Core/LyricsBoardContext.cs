@@ -106,9 +106,8 @@ namespace LyricsBoard.Core
             var lines = sd.Lyrics.Lines
                 .Select(x => new LyricsLine(
                     x.TimeMs,
-                    x.Texts.Select(ttt => new TimeTaggedText(ttt.TimeMs + offset, ttt.Text))
-                ))
-                .ToList();
+                    x.Texts.Select(ttc => new TimeTaggedChars(ttc.TimeMs + offset, ttc.Text))
+                ));
             return new Lyrics(lines);
         }
 

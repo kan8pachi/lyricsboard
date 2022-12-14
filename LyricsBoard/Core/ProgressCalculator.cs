@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace LyricsBoard.Core
 {
-    internal class ProgressableText
+    internal class ProgressiveLyrics
     {
         public float? Progress { get; set; }
         public string Text { get; set; } = string.Empty;
@@ -21,8 +21,8 @@ namespace LyricsBoard.Core
         private readonly Lyrics lyrics;
         private readonly Config config;
 
-        private Gen3Set<ProgressableText> textSetCache;
-        private Gen3Set<TimeMarkedTextList> searcher;
+        private Gen3Set<ProgressiveLyrics> textSetCache;
+        private Gen3Set<ProgressSearchableQueue> searcher;
 
         public ProgressCalculator(
             Lyrics lyrics,
@@ -32,7 +32,7 @@ namespace LyricsBoard.Core
             this.lyrics = lyrics;
             this.config = config;
 
-            textSetCache = new Gen3Set<ProgressableText>();
+            textSetCache = new Gen3Set<ProgressiveLyrics>();
             searcher = BuildSearcher();
         }
 
@@ -58,14 +58,14 @@ namespace LyricsBoard.Core
             return list[pos];
         }
 
-        private Gen3Set<TimeMarkedTextList> BuildSearcher()
+        private Gen3Set<ProgressSearchableQueue> BuildSearcher()
         {
             if(lyrics.Lines.Count() == 0)
             {
-                var retiring = new TimeMarkedTextList(new List<TimeMarkedText>());
-                var current = new TimeMarkedTextList(new List<TimeMarkedText>());
-                var standby = new TimeMarkedTextList(new List<TimeMarkedText>());
-                return new Gen3Set<TimeMarkedTextList>(standby, current, retiring);
+                var retiring = new ProgressSearchableQueue(new List<ProgressSearchableEntry>());
+                var current = new ProgressSearchableQueue(new List<ProgressSearchableEntry>());
+                var standby = new ProgressSearchableQueue(new List<ProgressSearchableEntry>());
+                return new Gen3Set<ProgressSearchableQueue>(standby, current, retiring);
             }
 
             var lines = lyrics.Lines
@@ -121,23 +121,23 @@ namespace LyricsBoard.Core
             }
 
             var standbyLines = lines
-                .Select(x => new TimeMarkedText(x.StandbyStart, x.StandbyEnd, x.CurrentStart, x.Text))
+                .Select(x => new ProgressSearchableEntry(x.StandbyStart, x.StandbyEnd, x.CurrentStart, x.Text))
                 .ToList();
             var currentLines = lines
-                .Select(x => new TimeMarkedText(x.CurrentStart, x.CurrentEnd, x.RetiringStart, x.Text))
+                .Select(x => new ProgressSearchableEntry(x.CurrentStart, x.CurrentEnd, x.RetiringStart, x.Text))
                 .ToList();
             var retiringLines = lines
-                .Select(x => new TimeMarkedText(x.RetiringStart, x.RetiringEnd, x.RetiringEnd, x.Text))
+                .Select(x => new ProgressSearchableEntry(x.RetiringStart, x.RetiringEnd, x.RetiringEnd, x.Text))
                 .ToList();
 
-            return new Gen3Set<TimeMarkedTextList>(
-                new TimeMarkedTextList(standbyLines),
-                new TimeMarkedTextList(currentLines),
-                new TimeMarkedTextList(retiringLines)
+            return new Gen3Set<ProgressSearchableQueue>(
+                new ProgressSearchableQueue(standbyLines),
+                new ProgressSearchableQueue(currentLines),
+                new ProgressSearchableQueue(retiringLines)
             );
         }
 
-        public Gen3Set<ProgressableText> GetPresentProgress(float songTime)
+        public Gen3Set<ProgressiveLyrics> GetPresentProgress(float songTime)
         {
             textSetCache.Standby = searcher.Standby.Search(songTime);
             textSetCache.Current = searcher.Current.Search(songTime);

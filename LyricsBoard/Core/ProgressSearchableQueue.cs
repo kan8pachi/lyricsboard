@@ -4,16 +4,16 @@ using System.Linq;
 
 namespace LyricsBoard.Core
 {
-    internal record TimeMarkedText(
+    internal record ProgressSearchableEntry(
         float StartTime,
         float AnimationEndTime,
         float EndTime,
-        string Text
+        string Data
     );
 
-    internal static class TimeMarkedTextExtensions
+    internal static class ProgressSearchableEntryExtensions
     {
-        public static float? GetProgress(this TimeMarkedText self, float time)
+        public static float? GetProgress(this ProgressSearchableEntry self, float time)
         {
             if (time < self.StartTime || time > self.EndTime) {
                 // Out of range should return zero.
@@ -28,7 +28,7 @@ namespace LyricsBoard.Core
         }
     }
 
-    internal class TimeMarkedTextList
+    internal class ProgressSearchableQueue
     {
         internal class PositionSearch
         {
@@ -61,13 +61,13 @@ namespace LyricsBoard.Core
             }
         }
 
-        private readonly List<TimeMarkedText> sortedTexts;
+        private readonly List<ProgressSearchableEntry> sortedTexts;
         private readonly PositionSearch search;
-        private readonly ProgressableText textCache;
+        private readonly ProgressiveLyrics textCache;
         private int lastPos;
-        public TimeMarkedTextList(List<TimeMarkedText> texts)
+        public ProgressSearchableQueue(List<ProgressSearchableEntry> texts)
         {
-            textCache = new ProgressableText();
+            textCache = new ProgressiveLyrics();
             sortedTexts = texts.OrderBy(x => x.StartTime).ToList();
 
             var indexList = sortedTexts.Select(x => x.StartTime).ToList();
@@ -76,7 +76,7 @@ namespace LyricsBoard.Core
             lastPos = 0;
         }
 
-        public ProgressableText Search(float time)
+        public ProgressiveLyrics Search(float time)
         {
             var pos = SearchPosition(time);
             if (pos < 0)
@@ -89,7 +89,7 @@ namespace LyricsBoard.Core
                 var ptext = sortedTexts[pos];
                 var progress = ptext.GetProgress(time);
                 textCache.Progress = progress;
-                textCache.Text = progress == null ? string.Empty : ptext.Text;
+                textCache.Text = progress == null ? string.Empty : ptext.Data;
             }
             return textCache;
         }
@@ -98,11 +98,12 @@ namespace LyricsBoard.Core
         {
             if (sortedTexts.Count == 0) { return -1; }
 
-            // if the time is the same position or the next, then use it.
+            // `time` has a slightly proceeded value from the previous call at most cases,
+            // so it is effective to check if the current position is the same as or the next of the previous.
             if (IsValidPosition(time, lastPos)) { return lastPos; }
             if (IsValidPosition(time, lastPos + 1)) { return ++lastPos; }
 
-            // search from whole list since the time might jumped.
+            // unexpected `time` has come. we need to search through the list.
             var pos = search.Search(time);
             lastPos = pos;
             return pos;

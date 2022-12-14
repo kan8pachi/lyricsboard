@@ -114,7 +114,7 @@ namespace LyricsBoard.View
         /// <summary>
         /// Update the displayed text, the position, and the colour(alpha) of each TextMeshPro.
         /// </summary>
-        private void UpdateText(TMP_Text obj, ProgressableText ptext, float offsetY, Func<float, float> geetAlpha)
+        private void UpdateText(TMP_Text obj, ProgressiveLyrics ptext, float offsetY, Func<float, float> geetAlpha)
         {
             obj.text = ptext.Text;
 
@@ -131,7 +131,7 @@ namespace LyricsBoard.View
         /// <summary>
         /// Update lyrics.
         /// </summary>
-        public void UpdateLyricsTexts(Gen3Set<ProgressableText> animations)
+        public void UpdateLyricsTexts(Gen3Set<ProgressiveLyrics> animations)
         {
             UpdateText(tmpTexts.Standby, animations.Standby, 0f, x => x * 0.7f);
             UpdateText(tmpTexts.Current, animations.Current, 1f, x => 0.7f + x * 0.3f);
