@@ -114,11 +114,12 @@ namespace LyricsBoard.View
         /// <summary>
         /// Update the displayed text, the position, and the colour(alpha) of each TextMeshPro.
         /// </summary>
-        private void UpdateText(TMP_Text obj, ProgressiveLyrics ptext, float offsetY, Func<float, float> geetAlpha)
+        private void UpdateText(TMP_Text obj, ProgressiveData<LyricsLine>? pline, float offsetY, Func<float, float> geetAlpha)
         {
-            obj.text = ptext.Text;
+            obj.text = pline is null ? string.Empty : string.Join("", pline.Data.Texts);
+            var progress = pline is null ? 0f : pline.Progress;
 
-            var animationY = CalculateAnimationCurve(ptext.Progress.GetValueOrDefault(0f));
+            var animationY = CalculateAnimationCurve(progress);
             var posY = heightUnit * 1.1f * (offsetY + animationY + 0.6f);
             obj.transform.position = new Vector3(
                 defaultPos.x,
@@ -131,7 +132,7 @@ namespace LyricsBoard.View
         /// <summary>
         /// Update lyrics.
         /// </summary>
-        public void UpdateLyricsTexts(Gen3Set<ProgressiveLyrics> animations)
+        public void UpdateLyricsTexts(Gen3Set<ProgressiveData<LyricsLine>?> animations)
         {
             UpdateText(tmpTexts.Standby, animations.Standby, 0f, x => x * 0.7f);
             UpdateText(tmpTexts.Current, animations.Current, 1f, x => 0.7f + x * 0.3f);

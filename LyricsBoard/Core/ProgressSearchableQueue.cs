@@ -4,16 +4,21 @@ using System.Linq;
 
 namespace LyricsBoard.Core
 {
-    internal record ProgressSearchableEntry(
+    internal record ProgressSearchableEntry<T>(
         float StartTime,
         float AnimationEndTime,
         float EndTime,
-        string Data
+        T Data
+    );
+
+    internal record ProgressiveData<T>(
+        float Progress,
+        T Data
     );
 
     internal static class ProgressSearchableEntryExtensions
     {
-        public static float? GetProgress(this ProgressSearchableEntry self, float time)
+        public static float? GetProgress<T>(this ProgressSearchableEntry<T> self, float time)
         {
             if (time < self.StartTime || time > self.EndTime) {
                 // Out of range should return zero.
@@ -28,7 +33,7 @@ namespace LyricsBoard.Core
         }
     }
 
-    internal class ProgressSearchableQueue
+    internal class ProgressSearchableQueue<T>
     {
         internal class PositionSearch
         {
@@ -61,13 +66,11 @@ namespace LyricsBoard.Core
             }
         }
 
-        private readonly List<ProgressSearchableEntry> sortedTexts;
+        private readonly List<ProgressSearchableEntry<T>> sortedTexts;
         private readonly PositionSearch search;
-        private readonly ProgressiveLyrics textCache;
         private int lastPos;
-        public ProgressSearchableQueue(List<ProgressSearchableEntry> texts)
+        public ProgressSearchableQueue(List<ProgressSearchableEntry<T>> texts)
         {
-            textCache = new ProgressiveLyrics();
             sortedTexts = texts.OrderBy(x => x.StartTime).ToList();
 
             var indexList = sortedTexts.Select(x => x.StartTime).ToList();
@@ -76,22 +79,22 @@ namespace LyricsBoard.Core
             lastPos = 0;
         }
 
-        public ProgressiveLyrics Search(float time)
+        public ProgressSearchableQueue() : this(new List<ProgressSearchableEntry<T>>()) { }
+
+        public ProgressiveData<T>? Search(float time)
         {
             var pos = SearchPosition(time);
             if (pos < 0)
             {
-                textCache.Progress = null;
-                textCache.Text = string.Empty;
+                return null;
             }
-            else
+            var ptext = sortedTexts[pos];
+            var progress = ptext.GetProgress(time);
+            if (progress is null)
             {
-                var ptext = sortedTexts[pos];
-                var progress = ptext.GetProgress(time);
-                textCache.Progress = progress;
-                textCache.Text = progress == null ? string.Empty : ptext.Data;
+                return null;
             }
-            return textCache;
+            return new ProgressiveData<T>(progress.Value, ptext.Data);
         }
 
         private int SearchPosition(float time)
