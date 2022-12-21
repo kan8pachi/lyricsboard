@@ -14,7 +14,10 @@ namespace LyricsBoard.Core
     internal record LyricsLine(
         long TimeMs,
         IEnumerable<TimeTaggedChars> Texts
-    );
+    )
+    {
+        public string PlainText { get; } = Texts.Select(x => x.Text).Aggregate((a, b) => a + b);
+    }
 
     internal record Lyrics(
         IEnumerable<LyricsLine> Lines
