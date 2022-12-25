@@ -20,5 +20,18 @@ namespace LyricsBoard.Core.Extension
                 yield return (T)e;
             }
         }
+
+        public static IEnumerable<TResult> Scan<T, TResult>(
+            this IEnumerable<T> source,
+            TResult seed,
+            Func<TResult, T, TResult> func
+        )
+        {
+            foreach (var x in source)
+            {
+                seed = func(seed, x);
+                yield return seed;
+            }
+        }
     }
 }

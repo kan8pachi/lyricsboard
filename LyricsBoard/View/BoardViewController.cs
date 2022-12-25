@@ -2,8 +2,10 @@
 using LyricsBoard.Core;
 using LyricsBoard.Core.Logging;
 using LyricsBoard.Core.Logging.Extension;
+using LyricsBoard.Core.Metrics;
 using SiraUtil.Logging;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -11,8 +13,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
-
-#nullable enable
 
 namespace LyricsBoard.View
 {
@@ -263,6 +263,9 @@ namespace LyricsBoard.View
     internal class BoardViewController : IInitializable, ITickable, IDisposable
     {
         private SiraLog? logger;
+        private readonly LinearBucketHistogram processingTimeSmsMetrics;
+        private readonly Stopwatch tickStopwatch;
+
         private LyricsBoardContext context;
         private GameplayCoreSceneSetupData gameplayCoreSceneSetupData;
         private AudioTimeSyncController audioTimeSyncController;
@@ -278,6 +281,8 @@ namespace LyricsBoard.View
         )
         {
             this.logger = logger;
+            tickStopwatch = new Stopwatch();
+            processingTimeSmsMetrics = new(nameof(BoardCanvas) + "-frames-metrics", 1024, 0, 1);
 
             // check if injected parameters are not null.
             if (context is null) { throw new ArgumentNullException(nameof(context)); }
@@ -298,6 +303,8 @@ namespace LyricsBoard.View
         {
             if (!IsWorking) { return; }
 
+            var stopwatch = Stopwatch.StartNew();
+
             var conf = context.Config;
 
             var boardPosition = new Vector3(conf.BoardPositionX, conf.BoardPositionY, conf.BoardPositionZ);
@@ -312,7 +319,10 @@ namespace LyricsBoard.View
                 conf.ShowBoardBackground
             );
 
-            GetCalculatorForPlayingSongAsync().ContinueWith(t =>
+            var tCalc = GetCalculatorForPlayingSongAsync();
+            var syncElapsed = stopwatch.ElapsedMilliseconds;
+
+            tCalc.ContinueWith(t =>
             {
                 // set calculator after async method returns the result.
                 var _calc = t.Result;
@@ -322,15 +332,39 @@ namespace LyricsBoard.View
                 }
                 calculator = _calc;
                 IsReady = true;
+                stopwatch.Stop();
+                var asyncElapsed = stopwatch.ElapsedMilliseconds;
+                logger?.Debug($"initialize time: (sync) {syncElapsed} ms, (async) {asyncElapsed} ms.");
             });
         }
 
         public void Dispose()
         {
-            if (!IsReady) { return; }
+            if (!IsReady)
+            {
+                return;
+            }
+            IsReady = false;
+            logger?.Info(processingTimeSmsMetrics.Summary());
+        }
+
+        private long To100MicroSeconds(long ticks)
+        {
+            return ticks * 10L * 1000L / Stopwatch.Frequency;
         }
 
         public void Tick()
+        {
+            tickStopwatch.Restart();
+
+            TickImpl();
+
+            tickStopwatch.Stop();
+            var elapsed = To100MicroSeconds(tickStopwatch.ElapsedTicks);
+            processingTimeSmsMetrics.Record(elapsed);
+        }
+
+        private void TickImpl()
         {
             if (!(IsWorking && IsReady)) { return; }
             if (calculator is null)
