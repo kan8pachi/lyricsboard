@@ -3,9 +3,9 @@
   "id": "LyricsBoard",
   "name": "LyricsBoard",
   "author": "kan8pachi",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A mod to display lyrcis of the song in Beat Saber.",
-  "gameVersion": "1.23.0",
+  "gameVersion": "1.27.0",
   "dependsOn": {
     "BSIPA": "^4.2.2",
     "BeatSaberMarkupLanguage": "^1.6.8",
