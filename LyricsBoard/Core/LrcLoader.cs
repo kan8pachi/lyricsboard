@@ -31,7 +31,7 @@ namespace LyricsBoard.Core
         /// <returns>Parsed instance or null if failed.</returns>
         public LyricsLine? ParseLine(string line)
         {
-            Func<GroupCollection, TimeTaggedChars?> f = (group) =>
+            Func<GroupCollection, KaraokeTaggedChars?> f = (group) =>
             {
                 var smin = group["min"].Value;
                 var ssec = group["sec"].Value;
@@ -57,7 +57,7 @@ namespace LyricsBoard.Core
                 }
 
                 long timeMs = (long)((min * 60 + sec) * 1000 + msc * 10);
-                return new TimeTaggedChars(timeMs, stxt);
+                return new KaraokeTaggedChars(timeMs, stxt);
             };
 
             // skip if line doesn't start from time tag.

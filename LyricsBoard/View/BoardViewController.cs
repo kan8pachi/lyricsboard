@@ -6,6 +6,7 @@ using LyricsBoard.Core.Metrics;
 using SiraUtil.Logging;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -273,6 +274,8 @@ namespace LyricsBoard.View
         private BoardCanvas? canvas;
         private ProgressCalculator? calculator;
 
+        private readonly Regex exBsr = new(@"^([0-9a-f]{1,6}) \(.+\)$");
+
         public BoardViewController(
             SiraLog? logger,
             LyricsBoardContext? context,
@@ -393,17 +396,18 @@ namespace LyricsBoard.View
         private async Task<ProgressCalculator?> GetCalculatorForPlayingSongAsync()
         {
             var levelId = gameplayCoreSceneSetupData.difficultyBeatmap.level.levelID;
+            var songHash = SongCore.Collections.hashForLevelID(levelId);
 
-            // copied from https://github.com/opl-/beatsaber-http-status
-            var songHash = Regex.IsMatch(
-                levelId,
-                "^custom_level_[0-9A-F]{40}",
-                RegexOptions.IgnoreCase
-            ) && !levelId.EndsWith(" WIP") ? levelId.Substring(13, 40) : null;
-            if (songHash is null)
+            if (songHash is null || songHash == string.Empty)
             {
                 logger?.Info($"Failed to get song hash from level ID [{levelId}]. ");
+                return null;
             }
+
+            // TODO: need inverted dictionary for better performance.
+            var songDirPath = SongCore.Loader.CustomLevels.First(level => level.Value.levelID == levelId).Key;
+            var bsrId = InferBsrId(songDirPath);
+            logger?.Debug($"Inferred bsr id is [{bsrId ?? "NotFound"}].");
 
             var calc = await context.GetLyricsProgressCalculatorAsync(songHash);
             if (calc is null)
@@ -413,6 +417,16 @@ namespace LyricsBoard.View
             }
             logger?.Debug($"Loaded lyrics for song [{songHash}].");
             return calc;
+        }
+
+        private string? InferBsrId(string songDirPath)
+        {
+            var dirname = Path.GetFileName(songDirPath);
+            
+            var match = exBsr.Match(dirname);
+            if (!match.Success) { return null; }
+
+            return match.Value;
         }
     }
 }
