@@ -18,14 +18,50 @@ namespace LyricsBoard.Test.Core
         [InlineData("[01:02.41]long dot", 62410, "long dot")]
         [InlineData("[01:02:41]long colon", 62410, "long colon")]
         [InlineData("[01:02.03]long dot with zero", 62030, "long dot with zero")]
-        [InlineData("[01:02][05:20]multiple time", 62000, "[05:20]multiple time")]
         public void ParseLine_Valid(string input, long expectTime, string expectText)
         {
             var loader = new LrcLoader(Mock.Of<IFileSystem>());
 
             var actual = loader.ParseLine(input)!;
             actual.TimeMs.Should().Be(expectTime);
-            actual.Text.Should().Be(expectText);
+            actual.Texts.First().TimeMs.Should().Be(expectTime);
+            actual.Texts.First().Text.Should().Be(expectText);
+        }
+
+        [Fact]
+        public void ParseLine_TimeTagged()
+        {
+            var input = "[01:02]time-[01:08:24]tagged [01:15:90]text";
+            var loader = new LrcLoader(Mock.Of<IFileSystem>());
+            var actual = loader.ParseLine(input)!;
+            actual.TimeMs.Should().Be(62000);
+            actual.Texts.Should().HaveCount(3);
+            actual.Texts.Select(x => x.TimeMs).Should().ContainInOrder(new[] { 62000L, 68240L, 75900L });
+            actual.Texts.Select(x => x.Text).Should().ContainInOrder(new[] { "time-", "tagged ", "text" });
+        }
+
+        [Fact]
+        public void ParseLine_TimeTaggedEmptyText()
+        {
+            var input = "[01:02][01:08]text";
+            var loader = new LrcLoader(Mock.Of<IFileSystem>());
+            var actual = loader.ParseLine(input)!;
+            actual.TimeMs.Should().Be(62000);
+            actual.Texts.Should().HaveCount(2);
+            actual.Texts.Select(x => x.TimeMs).Should().ContainInOrder(new[] { 62000L, 68000L });
+            actual.Texts.Select(x => x.Text).Should().ContainInOrder(new[] { "", "text" });
+        }
+
+        [Fact]
+        public void ParseLine_TimeTaggedLastEmpty()
+        {
+            var input = "[01:02]text[01:08]";
+            var loader = new LrcLoader(Mock.Of<IFileSystem>());
+            var actual = loader.ParseLine(input)!;
+            actual.TimeMs.Should().Be(62000);
+            actual.Texts.Should().HaveCount(2);
+            actual.Texts.Select(x => x.TimeMs).Should().ContainInOrder(new[] { 62000L, 68000L });
+            actual.Texts.Select(x => x.Text).Should().ContainInOrder(new[] { "text", "" });
         }
 
         [Theory]

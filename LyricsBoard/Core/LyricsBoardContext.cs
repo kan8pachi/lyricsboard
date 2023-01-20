@@ -104,8 +104,10 @@ namespace LyricsBoard.Core
  
             var offset = Config.GetLrcAdditionalOffsetMs(sd.OffsetMs);
             var lines = sd.Lyrics.Lines
-                .Select(x => new LyricsLine(x.TimeMs + offset, x.Text))
-                .ToList();
+                .Select(x => new LyricsLine(
+                    x.TimeMs,
+                    x.Texts.Select(ttc => new KaraokeTaggedChars(ttc.TimeMs + offset, ttc.Text))
+                ));
             return new Lyrics(lines);
         }
 
