@@ -8,6 +8,9 @@ Enjoy karaoke time in VR!
 ![Overview image 1](docs/overview1.jpg)
 ![Overview image 2](docs/overview2.jpg)
 
+<div><video controls src="https://user-images.githubusercontent.com/93933541/218266178-6b3ab2b6-f9e3-4cdf-9d01-6884560ebee6.mp4" muted="true"></video></div>
+<div><video controls src="https://user-images.githubusercontent.com/93933541/218266181-ce039246-6622-430d-a436-d8105494ffd7.mp4" muted="true"></video></div>
+
 ## Install
 
 ### Prerequisites
